@@ -35,9 +35,10 @@ Chromium de escritorio con SwiftShader renderiza WebGL por software. Las captura
 - **Detalles:** el código de sala se muestra en mayúscula y los nombres largos de los controles se cortan por sílabas.
 - Las capturas y la tabla de FPS de arriba son anteriores a estos cambios.
 
-## Avatar 05 (24/11/2026)
+## Avatar 05 (24/11/2026, revisión 2)
 
-- `src/render/avatar.ts` reemplazado por el modelo low poly facetado (estilo 05). Misma API: `makePilot` y `crewSeats`.
-- Se adaptó el campo opcional `custom` (ajustes finos de cara y colores), que el vestuario todavía no guarda.
-- 11.520 combinaciones generadas sin errores. Avatar base: 1.626 triángulos; peor caso: 3.874. Un solo material por avatar (colores por vértice), 5 mallas.
+- `src/render/avatar.ts` reemplazado por la revisión 2 del modelo facetado (estilo 05). Misma API: `makePilot` y `crewSeats`; suma `inspectPilot` y `REFERENCE_AVATAR`.
+- Parche en `src/render/cabin.ts`: en calidad Baja no se reemplazan los materiales del avatar.
+- Se adaptaron los campos opcionales `custom` y `style`, que el vestuario todavía no guarda.
+- 61.440 combinaciones (sentado y de pie) generadas sin errores ni valores inválidos. Peor caso: 1.435 triángulos, 5 mallas y 1 material.
 - Pasan `npm test`, avatares-3d, stage2, stage4, stage5, stage6 y fallback.

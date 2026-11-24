@@ -100,7 +100,7 @@ export function mountCabin(canvas: HTMLCanvasElement, initial: CabinOptions = {}
   function setMaterials(root: T.Object3D, simple: boolean, disposing = false) {
     const unused = new Set<T.MeshStandardMaterial>();
     root.traverse((object) => {
-      if (!(object instanceof T.Mesh)) return;
+      if (!(object instanceof T.Mesh) || object.userData.avatarFacetado === true) return;
       const original = materialDefaults.get(object) ?? (object.material instanceof T.MeshStandardMaterial ? object.material : undefined);
       if (!original) return;
       if (simple) {
