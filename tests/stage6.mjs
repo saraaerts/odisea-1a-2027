@@ -37,10 +37,10 @@ try {
   await live.locator('#projection-code').fill(jornada);
   await live.getByRole('button', { name: 'Ver la flota' }).click();
   await live.locator('.live[data-render="3d"]').waitFor();
-  assert.equal(await live.locator('.live-card[data-signal="waiting"]').count(), 4);
+  assert.equal(await live.locator('.live-card[data-signal="waiting"]').count(), 6);
 
   const hosts = [];
-  for (let index = 0; index < 4; index++) {
+  for (let index = 0; index < 6; index++) {
     const host = await prep('Capitana ' + index, 'tut', jornada);
     await host.getByRole('button', { name: 'Crear sala' }).click();
     await host.locator('#lobby-code').waitFor();
@@ -52,22 +52,25 @@ try {
     hosts.push(host);
   }
   for (const host of hosts) await host.getByRole('button', { name: 'Despegar' }).click();
-  await live.waitForFunction(() => document.querySelectorAll('.live-card[data-signal=active]').length === 4);
+  await live.waitForFunction(() => document.querySelectorAll('.live-card[data-signal=active]').length === 6);
   assert.equal(await live.locator('.live-canvas').count(), 1);
   assert.equal(await live.locator('.live-canvas').evaluate(canvas => !!canvas.getContext('webgl2')), true);
-  assert.equal(await live.locator('.live-number').allTextContents().then(text => text.join('/')), 'Nave 1/Nave 2/Nave 3/Nave 4');
+  assert.equal(await live.locator('.live-number').allTextContents().then(text => text.join('/')), 'Nave 1/Nave 2/Nave 3/Nave 4/Nave 5/Nave 6');
   assert.doesNotMatch(await live.locator('#live').innerText(), /Capitana|Tripulante/);
-  assert.match(await live.locator('.live-status').innerText(), /4 \/ 4/);
+  assert.match(await live.locator('.live-status').innerText(), /6 \/ 6/);
 
   await live.bringToFront();
   const cover = live.locator('.live-grid');
   const checkLayout = async () => {
     const cards = await live.locator('.live-card').evaluateAll(items =>
       items.map(item => [item.offsetLeft, item.offsetTop, item.offsetWidth, item.offsetHeight]));
-    assert.equal(cards[0][1], cards[1][1]);
-    assert.equal(cards[2][1], cards[3][1]);
-    assert.equal(cards[0][0], cards[2][0]);
-    assert.equal(cards[1][0], cards[3][0]);
+    // Horizontal: 3 columnas × 2 filas. Vertical: 2 columnas × 3 filas.
+    const columns = await live.evaluate(() => innerWidth > innerHeight ? 3 : 2);
+    for (let index = 0; index < cards.length; index++) {
+      assert.equal(cards[index][1], cards[index - index % columns][1], 'misma fila');
+      assert.equal(cards[index][0], cards[index % columns][0], 'misma columna');
+    }
+    assert.equal(new Set(cards.map(card => card[1])).size, 6 / columns);
     assert.ok(cards.every(card => card[2] > 70 && card[3] > 60));
     assert.ok(await live.evaluate(() => document.documentElement.scrollHeight <= innerHeight));
     assert.ok(await live.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
@@ -84,6 +87,12 @@ try {
   await live.setViewportSize({ width: 800, height: 360 });
   await checkLayout();
   await live.screenshot({ path: 'test-results/proyector-800x360.png' });
+  await live.setViewportSize({ width: 412, height: 915 });
+  await checkLayout();
+  await live.screenshot({ path: 'test-results/proyector-412x915.png' });
+  await live.setViewportSize({ width: 1920, height: 1080 });
+  await checkLayout();
+  await live.screenshot({ path: 'test-results/proyector-1920x1080.png' });
   await live.getByRole('button', { name: 'Ocultar alertas' }).click();
   assert.equal(await live.locator('#live-alerts').isVisible(), false);
   await live.getByRole('button', { name: 'Mostrar alertas' }).click();
@@ -92,7 +101,7 @@ try {
   await live.getByRole('button', { name: 'Odisea, inicio' }).click();
   assert.equal(await live.locator('.live-canvas').count(), 0);
   assert.deepEqual(faults, []);
-  console.log('Proyector: cuatro partidas en vivo, un contexto WebGL, telemetría, alertas y grilla sin scroll en 1366×768 y 800×360.');
+  console.log('Proyector: seis partidas en vivo, un contexto WebGL, telemetría, alertas y grilla sin scroll en 1366×768, 1920×1080, 800×360 y 412×915.');
 } finally {
   await browser.close();
 }

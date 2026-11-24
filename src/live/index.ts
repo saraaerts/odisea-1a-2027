@@ -5,6 +5,8 @@ import type { Feed, mountTelemetry } from './telemetry.ts';
 import './live.css';
 
 const TTL = 12_000;
+/** Partidas que entran a la vez en la pantalla del proyector. */
+export const LIVE_SLOTS = 6;
 const TITLES = {
   ok: 'Orden resuelta',
   err: 'Control equivocado',
@@ -27,7 +29,7 @@ function layout() {
       <div class="live-tools"><button type="button" class="quiet" id="live-alerts-toggle" aria-controls="live-alerts" aria-pressed="true">Ocultar alertas</button><button type="button" class="quiet" id="live-back">Volver</button></div>
     </header>
     <div class="live-deck">
-      <div class="live-grid">${Array.from({ length: 4 }, (_, slot) => `
+      <div class="live-grid">${Array.from({ length: LIVE_SLOTS }, (_, slot) => `
         <article class="live-card" data-slot="${slot}" data-signal="waiting">
           <div class="live-feed" aria-hidden="true"><span class="live-planet"></span><span class="live-reticle"></span><span class="live-dash"></span></div>
           <div class="live-caption"><span class="live-number">Nave ${slot + 1}</span><h2>Esperando señal</h2></div>
@@ -48,7 +50,7 @@ export async function mountLive(root: HTMLElement, room: Room, jornada: string, 
   const toggle = root.querySelector<HTMLButtonElement>('#live-alerts-toggle')!;
   const ribbon = root.querySelector<HTMLElement>('#live-alerts')!;
   const alert = ribbon.querySelector('p')!;
-  const slots: (string | undefined)[] = Array(4).fill(undefined);
+  const slots: (string | undefined)[] = Array(LIVE_SLOTS).fill(undefined);
   const summaries = new Map<string, { summary: BoardSummary; at: number; lastAlert: number }>();
   let stopped = false;
   let drawTimer: ReturnType<typeof setInterval> | undefined;
@@ -84,7 +86,7 @@ export async function mountLive(root: HTMLElement, room: Room, jornada: string, 
       feeds.push({ host: card, summary: data });
     }
     const text = active === 0 ? 'Esperando partidas · ' + jornada.toUpperCase()
-      : active + ' / 4 ' + (active === 1 ? 'nave en pantalla' : 'naves en pantalla');
+      : active + ' / ' + LIVE_SLOTS + ' ' + (active === 1 ? 'nave en pantalla' : 'naves en pantalla');
     if (status.textContent !== text) status.textContent = text;
     needsDraw = true;
   }

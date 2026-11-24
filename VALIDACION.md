@@ -50,3 +50,8 @@ Chromium de escritorio con SwiftShader renderiza WebGL por software. Las captura
 - Vestuario: ajuste fino de rasgos y colores en dos pestañas. `tests/stage5.mjs` se actualizó para abrir la pestaña Colores y medir solo los controles visibles.
 - Pasan `npm test` (17), avatar-cobertura, avatares-3d, stage2, stage4, stage5, stage6 y fallback, y una partida completa de cuatro pestañas con proyector sin errores de consola.
 - Los archivos `src/render/retro-*` no se usan en el juego y no suman peso al build.
+
+## Proyector de seis partidas (24/11/2026)
+
+- La pantalla en vivo muestra hasta 6 partidas: grilla de 3 × 2 en pantallas horizontales y de 2 × 3 en verticales. Pensado para una jornada de unas 20 personas en 5 grupos de 4.
+- `tests/stage6.mjs` arma seis partidas simultáneas y controla la grilla sin scroll en 1366×768, 1920×1080, 800×360 y 412×915.

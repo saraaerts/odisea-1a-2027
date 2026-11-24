@@ -11,7 +11,7 @@ La versión 3D vive en `odisea-3d/`. El `index.html` en la raíz es la versión 
 | Cooperación | Hasta 4 por grupo; 3–4 recomendado, 2 permitido para ensayar, 1 con práctica local. Cada persona tiene su propio panel y recibe pedidos para otro puesto. Si se repite el área se asigna el control a una persona concreta. En práctica, los bots cubren los otros puestos. Tras el reparto inicial, cada pedido va a cualquier compañero con menos de dos pendientes; las áreas en foco de la etapa pesan el triple y no se repite enseguida el control recién resuelto. |
 | Diferencias pedidas | Tres manos **por persona** por etapa (antes eran tres compartidas). Cada vencimiento prende un foco; se puede apagar, como en el 2D. Se respeta el ciclo de daño de 2 s de cada foco y el intervalo de 6 s entre etapas. Un dial o interruptor pedido admite posiciones intermedias sin sumar error. |
 | Premios | Un solo premio local por partida grupal: 100 perfecta, 50 aprobada, 10 participación, 5 casco roto. El perfil importa cuando puede las claves locales de la versión anterior. Los perfiles se editan en el dispositivo; se transmiten alias y opciones del avatar, sin datos académicos. |
-| Proyección | Código de jornada común, códigos de partida separados. La grilla muestra hasta cuatro partidas activas sin nombres, ordenadas en forma estable. Las tarjetas viejas se vencen y liberan su lugar. |
+| Proyección | Código de jornada común, códigos de partida separados. La grilla muestra hasta seis partidas activas (3 × 2; 2 × 3 en pantallas verticales) sin nombres, ordenadas en forma estable. Las tarjetas viejas se vencen y liberan su lugar. |
 
 ## Arquitectura
 
