@@ -6,7 +6,7 @@ La versión 3D vive en `odisea-3d/`. El `index.html` en la raíz es la versión 
 
 | Tema | Decisión |
 |---|---|
-| Reglas | Flota simbólica de 40, corte en 32 y meta 40. No se usan registros de estudiantes. Casco en cero termina como «Nave rota», incluso con 32 naves o más. Las 8 etapas se completan con órdenes cumplidas; las vencidas se reemplazan. |
+| Reglas | Flota simbólica de 40, corte en 18 (43 % de permanencia: base 34 % más 9 puntos) y meta 40. No se usan registros de estudiantes. Casco en cero termina como «Nave rota», incluso con 18 naves o más. Las 8 etapas se completan con órdenes cumplidas; las vencidas se reemplazan. |
 | Numeración | La fórmula usa el índice de etapa 0–7, como el 2D: sin ajuste son 10 s en Despegue y 5,8 s en Reinscripción. La pantalla numera 1–8. El objetivo por etapa queda fijo según la tripulación al arrancarla. |
 | Cooperación | Hasta 4 por grupo; 3–4 recomendado, 2 permitido para ensayar, 1 con práctica local. Cada persona tiene su propio panel y recibe pedidos para otro puesto. Si se repite el área se asigna el control a una persona concreta. En práctica, los bots cubren los otros puestos. Tras el reparto inicial, cada pedido va a cualquier compañero con menos de dos pendientes; las áreas en foco de la etapa pesan el triple y no se repite enseguida el control recién resuelto. |
 | Diferencias pedidas | Tres manos **por persona** por etapa (antes eran tres compartidas). Cada vencimiento prende un foco; se puede apagar, como en el 2D. Se respeta el ciclo de daño de 2 s de cada foco y el intervalo de 6 s entre etapas. Un dial o interruptor pedido admite posiciones intermedias sin sumar error. |

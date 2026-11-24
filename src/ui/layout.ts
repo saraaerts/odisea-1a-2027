@@ -15,7 +15,7 @@ export const shell = `
         <div class="coordinates" aria-hidden="true">01A / 2027 <b>●</b> RUTA ACADÉMICA</div>
       </div>
       <div class="home-panels">
-        <div class="brief"><p class="eyebrow">01 / OBJETIVO</p><h2>Sostengan la flota</h2><p>Lean las órdenes en voz alta: siempre corresponden al panel de otra persona. Lleguen con al menos 32 de las 40 naves.</p></div>
+        <div class="brief"><p class="eyebrow">01 / OBJETIVO</p><h2>Sostengan la flota</h2><p>Lean las órdenes en voz alta: siempre corresponden al panel de otra persona. Lleguen con al menos 18 de las 40 naves: el 43 % de permanencia.</p></div>
         <div class="brief"><p class="eyebrow">02 / TU PUESTO</p><h2 id="home-alias">Armá tu perfil</h2><p id="home-profile">Elegí tu área y prepará tu avatar.</p><button class="quiet link" data-go="profile">Abrir vestuario ↗</button></div>
         <div class="brief"><p class="eyebrow">03 / PROYECCIÓN</p><h2>Pantalla en vivo</h2><p>Mostrá el avance de hasta seis naves en una sola pantalla.</p><button class="quiet link" data-go="projection">Abrir proyector ↗</button></div>
       </div>

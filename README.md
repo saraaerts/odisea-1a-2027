@@ -1,6 +1,6 @@
 # Odisea 1A 2027
 
-Juego cooperativo para Academia de Teclab. Cada persona ocupa un puesto y recibe órdenes para el panel de otra. Lean las órdenes en voz alta y traten de llegar a la última estación con 32 de las 40 naves. La meta es que lleguen todas. Las naves son simbólicas; usá apodos y no ingreses datos de estudiantes.
+Juego cooperativo para Academia de Teclab. Cada persona ocupa un puesto y recibe órdenes para el panel de otra. Lean las órdenes en voz alta y traten de llegar a la última estación con al menos 18 de las 40 naves (43 % de permanencia). La meta es que lleguen todas. Las naves son simbólicas; usá apodos y no ingreses datos de estudiantes.
 
 ## Probalo en tu compu
 
@@ -50,7 +50,7 @@ Para pruebas puntuales, corré `npm run test:2d`, `npm run test:respaldo`, `node
 
 - Definí quién será dueño del repo y del proyecto de Supabase, y probá la red con cuatro grupos y el proyector. La recuperación ante una partición total no tiene garantía de consenso sin servidor coordinador.
 - Validá 30 FPS en Media, temperatura, memoria y primera carga en 4G con un Android de gama media y un iPhone reales. Un navegador emulado sirve para revisar tamaños y detectar errores, pero no reemplaza esos equipos.
-- Confirmá los nombres y controles de cada área y el uso de marca. La base del 70 % y la mejora de 10 puntos pertenecen a la metáfora del juego; cualquier cifra institucional real se valida por fuera y no se guarda acá.
+- Confirmá los nombres y controles de cada área y el uso de marca. La base del 34 % y la mejora de 9 puntos (objetivo 43 %) pertenecen a la metáfora del juego; cualquier cifra institucional real se valida por fuera y no se guarda acá.
 - Si querés más realismo, priorizá GLB comprimidos y texturas KTX2/WebP con licencias verificadas. El fuego y los personajes actuales apuntan a una buena lectura en celular, con un presupuesto pequeño.
 
 Más detalles: [arquitectura y riesgos](ARQUITECTURA.md), [créditos](CREDITS.md) y [contexto del proyecto](AGENTS.md). Referencias oficiales: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site), [Supabase Broadcast](https://supabase.com/docs/guides/realtime/broadcast), [Supabase Presence](https://supabase.com/docs/guides/realtime/presence).

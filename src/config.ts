@@ -2,8 +2,8 @@
 // Las listas de etapas usan números del 1 al 8. Si no hay lista, el control aparece siempre.
 export const CONFIG = {
   naves: 40,
-  permanenciaBase: 70,
-  mejoraObjetivo: 10,
+  permanenciaBase: 34,
+  mejoraObjetivo: 9,
   areas: [
     { id: "tut", nombre: "Tutores", hace: "Acompañamiento académico en la cursada y los finales",
       controles: [

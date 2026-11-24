@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CONFIG, cleanAvatar, type AreaId } from "../src/config.ts";
+import { CONFIG, PASS_SHIPS, cleanAvatar, type AreaId } from "../src/config.ts";
 import {
   RULES, applyAction, createGame, decodeAction, decodeState, encodeState, launch,
   orderDurationMs, ordersRequired, outcome, setActivePlayers, tick, visibleControls,
@@ -173,9 +173,11 @@ test("valida el panel, los diales, el resultado por umbral y los puntos de prác
   assert.equal(doOrder(state, order), true);
   assert.equal(state.stats.ok, 1);
   state.cleared = 7;
-  state.ships = 32;
+  // Objetivo: 43 % de 40 naves = 17,2, se redondea a 18.
+  assert.equal(PASS_SHIPS, 18);
+  state.ships = 18;
   assert.deepEqual(outcome(state), { title: "Aprobaron", points: 50, kind: "aprobado" });
-  state.ships = 31;
+  state.ships = 17;
   assert.deepEqual(outcome(state), { title: "No alcanzó", points: 10, kind: "participar" });
   state.group = false;
   assert.equal(outcome(state).points, 0);
