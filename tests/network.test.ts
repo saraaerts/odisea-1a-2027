@@ -46,7 +46,8 @@ class FakeChannel implements WireChannel {
   }
 
   async send(input: Outbound): Promise<string> {
-    if (!this.online) return 'error';
+    // Un canal que nunca se suscribió envía por REST, como supabase-js.
+    if (!this.online && this.statuses) return 'error';
     this.server.send(this, input);
     return 'ok';
   }
@@ -208,6 +209,8 @@ test('cuatro clientes con 500 ms y 5 % de pérdida sobreviven a la caída y reto
     player.avatar.custom?.skin === '#A0969B' && player.avatar.custom?.brows === -2 && player.avatar.style === 'retro')));
   assert.equal(network.channels.filter(channel => channel.topic.includes('live:')).length, 2,
     'solo el anfitrión y el proyector quedan suscriptos al canal común');
+  assert.equal(network.channels.filter(channel => channel.topic.includes('live:') && channel.online).length, 1,
+    'el anfitrión solo envía al canal común: no recibe los resúmenes de las demás salas');
   assert.ok(observed.every(item => item.players.every(player => !('name' in player))));
   assert.ok(network.dropped > 0, 'el escenario efectivamente descartó mensajes');
   assert.ok(network.transmissions.every(item => jsonBytes(item) < 4096));

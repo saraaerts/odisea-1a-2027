@@ -11,6 +11,8 @@ export interface Message {
 export interface Room {
   peerId: string;
   join(topic: string): Promise<Room>;
+  /** Canal solo para enviar: no recibe lo que mandan los demás (no suma mensajes al plan de Supabase). */
+  publish(topic: string): Room;
   emit(event: string, data: unknown): Promise<void>;
   on(event: string, listener: (message: Message) => void): () => void;
   presence(data: unknown): Promise<void>;
@@ -113,10 +115,11 @@ function checkPresence(data: unknown): void {
   }
 }
 
-function baseRoom(peerId: string, join: Room['join']): Room {
+function baseRoom(peerId: string, join: Room['join'], publish: Room['publish']): Room {
   return {
     peerId,
     join,
+    publish,
     emit: async () => { throw new Error('Abrí un canal primero.'); },
     on: () => () => {},
     presence: async () => { throw new Error('Abrí un canal primero.'); },
@@ -162,6 +165,7 @@ export function createRealtimeRoom(client: RealtimeClient, peerId = newPeerId())
     const room: Room = {
       peerId,
       join,
+      publish,
       async emit(event, data) {
         if (!online) throw new Error('Reconectando con la nave…');
         if (await channel.send({ type: 'broadcast', event, payload: frame(peerId, event, data) }) !== 'ok') {
@@ -223,7 +227,29 @@ export function createRealtimeRoom(client: RealtimeClient, peerId = newPeerId())
     }
     return room;
   }
-  return baseRoom(peerId, join);
+  // Sin suscribirse, supabase-js manda cada mensaje por la API REST de Broadcast.
+  function publish(topic: string): Room {
+    const channel = client.channel(channelName(topic), {
+      config: { broadcast: { self: false }, presence: { key: peerId }, private: false },
+    });
+    let closed = false;
+    return {
+      ...baseRoom(peerId, join, publish),
+      async emit(event, data) {
+        if (closed) throw new Error('El canal se cerró.');
+        if (await channel.send({ type: 'broadcast', event, payload: frame(peerId, event, data) }) !== 'ok') {
+          throw new Error('El mensaje no salió de la nave.');
+        }
+      },
+      async leave() {
+        if (closed) return;
+        closed = true;
+        await client.removeChannel(channel);
+      },
+      connected: () => !closed,
+    };
+  }
+  return baseRoom(peerId, join, publish);
 }
 
 export async function createSupabaseRoom(url: string, anon: string, peerId = newPeerId()): Promise<Room> {
@@ -287,6 +313,7 @@ export function createLocalRoom(peerId = newPeerId()): Room {
     return {
       peerId,
       join,
+      publish,
       async emit(event, data) {
         if (!online) throw new Error('El canal se cerró.');
         channel.postMessage({ type: 'broadcast', p: peerId, event, frame: frame(peerId, event, data) });
@@ -315,5 +342,22 @@ export function createLocalRoom(peerId = newPeerId()): Room {
       connected: () => online,
     };
   }
-  return baseRoom(peerId, join);
+  function publish(topic: string): Room {
+    const channel = new BroadcastChannel(channelName(topic));
+    let online = true;
+    return {
+      ...baseRoom(peerId, join, publish),
+      async emit(event, data) {
+        if (!online) throw new Error('El canal se cerró.');
+        channel.postMessage({ type: 'broadcast', p: peerId, event, frame: frame(peerId, event, data) });
+      },
+      async leave() {
+        if (!online) return;
+        online = false;
+        channel.close();
+      },
+      connected: () => online,
+    };
+  }
+  return baseRoom(peerId, join, publish);
 }

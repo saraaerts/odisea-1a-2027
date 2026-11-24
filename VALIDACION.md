@@ -55,3 +55,9 @@ Chromium de escritorio con SwiftShader renderiza WebGL por software. Las captura
 
 - La pantalla en vivo muestra hasta 6 partidas: grilla de 3 × 2 en pantallas horizontales y de 2 × 3 en verticales. Pensado para una jornada de unas 20 personas en 5 grupos de 4.
 - `tests/stage6.mjs` arma seis partidas simultáneas y controla la grilla sin scroll en 1366×768, 1920×1080, 800×360 y 412×915.
+
+## Menos mensajes de Supabase para jornadas grandes (24/11/2026)
+
+- Quien crea una sala envía el resumen al proyector por un canal solo de envío (API REST de Broadcast): ya no recibe los resúmenes de las demás salas. El resumen sale cada 2 s.
+- Sin cambios en la partida, el estado se repite cada 2 s (antes 1 s). Para no confundir una pausa con una caída, el aviso de reconexión pasa a 3,5 s y la elección de nuevo anfitrión a 6,5 s.
+- Medición simulada con salas de 4 que juegan y un proyector (cada envío cuenta 1 más 1 por receptor, como factura Supabase): 5 salas, de 73 a 27 mensajes por segundo; 10 salas, de 216 a 54. El plan gratis permite 100.

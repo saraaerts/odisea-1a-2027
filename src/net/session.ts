@@ -12,11 +12,13 @@ export type { BoardSummary } from './protocol.ts';
 
 const TICK = 200;
 const MAX_STEP = 1500;
-const SNAPSHOT_INTERVAL = 1000;
-const BOARD_INTERVAL = 700;
+// Sin cambios en la partida, el estado se repite cada 2 s; los cambios salen en el pulso siguiente.
+const SNAPSHOT_INTERVAL = 2000;
+// El proyector recibe un resumen cada 2 s por un canal solo de envío.
+const BOARD_INTERVAL = 2000;
 const RETRY_INTERVAL = 900;
-const RECONNECT_WARNING = 2000;
-const ELECTION_START = 4200;
+const RECONNECT_WARNING = 3500;
+const ELECTION_START = 6500;
 const ELECTION_STAGGER = 600;
 const PRESENCE_GRACE = 2500;
 const BOARD_EXPIRY = 12_000;
@@ -150,7 +152,7 @@ export async function createSession(options: SessionOptions): Promise<Session> {
 
   function sendBoard(at: number, closedPhase = false): Promise<void> {
     if (!game || !board?.connected()) return Promise.resolve();
-    // La simulación corre cada 200 ms. Conservá la fase de 700 ms entre envíos
+    // La simulación corre cada 200 ms. Conservá la fase de 2 s entre envíos
     // aunque cada envío individual caiga en el pulso siguiente.
     lastBoard = at - lastBoard < 2 * BOARD_INTERVAL ? lastBoard + BOARD_INTERVAL : at;
     const payload = {
@@ -166,18 +168,15 @@ export async function createSession(options: SessionOptions): Promise<Session> {
   function connectBoard(at: number): void {
     if (board || boardOpening || at < boardRetryAt) return;
     boardOpening = true;
-    void options.room.join(`live:${jornada}`).then(async channel => {
-      if (closed || !isHost()) {
-        await channel.leave();
-        return;
-      }
-      board = channel;
-      await sendBoard(now());
-    }).catch(() => {
+    try {
+      // Solo envío: así quien creó una sala no recibe los resúmenes de las demás.
+      board = options.room.publish(`live:${jornada}`);
+      void sendBoard(now());
+    } catch {
       boardRetryAt = now() + 5000;
-    }).finally(() => {
+    } finally {
       boardOpening = false;
-    });
+    }
   }
 
   function receiveState(message: Message): void {
