@@ -67,7 +67,7 @@ try {
   await piece('Dorado').click();
   assert.notDeepEqual(await portrait.screenshot(), original, 'Cambiar las piezas y colores modifica el avatar 3D');
 
-  const controls = await page.locator('.wardrobe-grid button').evaluateAll(buttons => buttons.map(button => {
+  const controls = await page.locator('.wardrobe-grid button:visible').evaluateAll(buttons => buttons.map(button => {
     const { width, height } = button.getBoundingClientRect();
     return { width, height };
   }));
@@ -95,13 +95,68 @@ try {
     gorro: 2, colorGorro: 2, acc: 1, colorAcc: 6, lentes: 7, colorLentes: 3,
   });
 
+  await page.goto(new URL('?vista=vestuario&modo=ajuste', url).href);
+  const fine = page.getByRole('button', { name: 'Ajuste fino', exact: true });
+  await fine.waitFor();
+  assert.equal(await fine.getAttribute('aria-pressed'), 'true');
+  const left = page.getByRole('button', { name: 'Girar a la izquierda' });
+  await left.waitFor();
+  const straight = await portrait.screenshot();
+  await left.click();
+  assert.notDeepEqual(await portrait.screenshot(), straight, 'El botón cambia el ángulo del avatar 3D');
+  await page.getByRole('button', { name: 'Girar a la derecha' }).click();
+
+  const faceValues = { jaw: -2, cheek: 2, eyes: -1, brows: 1, nose: 2, lips: -2 };
+  for (const [key, value] of Object.entries(faceValues)) await page.locator(`[data-wardrobe-face="${key}"]`).fill(String(value));
+  assert.equal(await page.getByRole('slider', { name: 'Mandíbula' }).getAttribute('aria-valuetext'), 'Muy angosta');
+  // Los colores viven en su propia pestaña del ajuste fino.
+  await page.locator('[data-wardrobe-fine-panel="colors"]').click();
+  const colorValues = { skin: '#AA806A', hair: '#7A263F', suit: '#5614CA', hat: '#42CD9C', accessory: '#CB346E', glasses: '#DDAA21' };
+  for (const [key, value] of Object.entries(colorValues)) {
+    const hex = page.locator(`[data-wardrobe-hex="${key}"]`);
+    await hex.fill(value.toLowerCase());
+    await hex.press('Enter');
+    assert.equal(await hex.inputValue(), value);
+  }
+  const skin = page.getByRole('textbox', { name: 'Código hex de piel' });
+  await skin.fill('#123');
+  await skin.press('Enter');
+  assert.equal(await skin.getAttribute('aria-invalid'), 'true');
+  assert.doesNotMatch(await page.locator('.wardrobe-status').textContent(), /^$/);
+  const fineControls = await page.locator('.wardrobe-fine :is(input,button), .wardrobe-turn button').evaluateAll(els =>
+    els.map(el => [el.getBoundingClientRect().width, el.getBoundingClientRect().height]),
+  );
+  // La pestaña oculta del ajuste fino mide 0 × 0; se controlan las visibles.
+  assert.ok(fineControls.filter(([width, height]) => width || height).every(([width, height]) => width >= 44 && height >= 44));
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 360);
+  await page.reload();
+  assert.equal(await page.getByRole('slider', { name: 'Mandíbula' }).inputValue(), '-2');
+  assert.equal(await page.locator('[data-wardrobe-hex="skin"]').inputValue(), '#AA806A');
+  assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('odisea-3d-perfil')).avatar.custom), {
+    ...faceValues, ...colorValues,
+  });
+
   await page.evaluate(() => localStorage.setItem('odisea-3d-config', JSON.stringify({ quality: 'classic' })));
   await page.reload();
-  await openWardrobe();
+  await page.getByRole('slider', { name: 'Mandíbula' }).waitFor();
   assert.ok(await page.locator('.wardrobe-classic svg').isVisible());
   assert.ok(await page.locator('.wardrobe-canvas').isHidden());
+  assert.ok(await page.getByRole('button', { name: 'Girar a la izquierda' }).isHidden());
+  const beforeReset = await page.locator('.wardrobe-classic svg').innerHTML();
+  for (const value of Object.values(colorValues)) assert.ok(beforeReset.includes(value), 'SVG usa el color personalizado ' + value);
+  await choose('Pelo');
+  await piece('Cian').click();
+  assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('odisea-3d-perfil')).avatar.custom), {
+    ...faceValues, ...Object.fromEntries(Object.entries(colorValues).filter(([key]) => key !== 'hair')),
+  });
+  await choose('Ajuste fino');
+  await page.getByRole('button', { name: 'Restablecer ajuste fino' }).click();
+  assert.equal(await page.getByRole('slider', { name: 'Mandíbula' }).inputValue(), '0');
+  assert.notEqual(await page.locator('.wardrobe-classic svg').innerHTML(), beforeReset);
+  assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('odisea-3d-perfil')).avatar), saved.profile.avatar);
+  assert.equal(await page.locator('.wardrobe-points').textContent(), '15 puntos');
   assert.deepEqual(errors, []);
-  console.log('Validación del vestuario: vista 3D y clásica, piezas, colores, compras, migración y persistencia.');
+  console.log('Validación del vestuario: giro 3D, retrato clásico, rasgos, tintes hex, reset, compras, migración y persistencia.');
 } finally {
   await browser.close();
 }

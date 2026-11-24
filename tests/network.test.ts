@@ -1,14 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { cleanAvatar } from '../src/config.ts';
-import { type GameAction } from '../src/sim/index.ts';
-import { acknowledged, addAck, cleanPlayer, readSummary, type Ack } from '../src/net/protocol.ts';
+import { createGame, encodeState, launch, RULES, tick, type GameAction } from '../src/sim/index.ts';
+import { acknowledged, addAck, cleanPlayer, MAX_BODY_BYTES, readSnapshot, readSummary, type Ack } from '../src/net/protocol.ts';
 import { createRealtimeRoom, jsonBytes, type RealtimeClient } from '../src/net/room.ts';
 import { createSession, watchBoard, type BoardSummary, type Session, type SessionView } from '../src/net/session.ts';
 
 type WireChannel = ReturnType<RealtimeClient['channel']>;
 type Outbound = Parameters<WireChannel['send']>[0];
 type Meta = { [key: string]: unknown };
+
+const testAvatar = cleanAvatar({
+  pelo: 9, ropa: 5, gorro: 7, acc: 7, lentes: 10, style: 'retro',
+  custom: { jaw: -2, cheek: 2, eyes: 2, brows: -2, nose: -2, lips: 2,
+    skin: '#a0969b', hair: '#aeb5c7', suit: '#0056f3', hat: '#062149',
+    accessory: '#4F913C', glasses: '#8C4C17' },
+});
 
 class FakeChannel implements WireChannel {
   online = false;
@@ -146,7 +153,7 @@ test('cuatro clientes con 500 ms y 5 % de pérdida sobreviven a la caída y reto
     sessions.push(await createSession({
       room: createRealtimeRoom(network.client(), id),
       code: 'nave', jornada: 'jorn',
-      profile: { name: id, area, avatar: cleanAvatar({}) },
+      profile: { name: id, area, avatar: testAvatar },
       host: id === 'pilot0', clock: () => network.time, autoTick: false,
       onChange: id === 'pilot2' ? view => changes.push(view) : undefined,
     }));
@@ -154,6 +161,7 @@ test('cuatro clientes con 500 ms y 5 % de pérdida sobreviven a la caída y reto
   const [oldHost, first, second, third] = sessions;
   await network.advance(2000, sessions);
   assert.equal(first.view().players.length, 4);
+  assert.deepEqual(first.view().players.map(player => player.avatar), Array(4).fill(testAvatar));
   assert.equal(second.start(), false, 'un visitante no controla la partida');
   assert.equal(oldHost.start(800), true);
   await network.advance(7000, sessions);
@@ -189,12 +197,15 @@ test('cuatro clientes con 500 ms y 5 % de pérdida sobreviven a la caída y reto
   assert.equal(oldHost.view().host, false, 'quien volvió queda como tripulante');
   assert.equal(oldHost.view().game?.gid, gid);
   assert.equal(first.view().game?.active.length, 4);
+  assert.deepEqual(oldHost.view().game?.players.map(player => player.avatar), Array(4).fill(testAvatar));
   const oldChannel = network.channels.find(channel => channel.peer === oldHost.peerId && channel.topic.includes('group:'))!;
   await oldChannel.send(oldWire);
   await network.advance(800, sessions);
   assert.equal(second.view().game?.gid, gid, 'se descarta un mensaje de un epoch anterior');
   assert.equal(first.view().host, true);
   assert.ok(observed.some(item => item.epoch === 1 && item.host === first.peerId));
+  assert.ok(observed.some(item => item.players.length === 4 && item.players.every(player =>
+    player.avatar.custom?.skin === '#A0969B' && player.avatar.custom?.brows === -2 && player.avatar.style === 'retro')));
   assert.equal(network.channels.filter(channel => channel.topic.includes('live:')).length, 2,
     'solo el anfitrión y el proyector quedan suscriptos al canal común');
   assert.ok(observed.every(item => item.players.every(player => !('name' in player))));
@@ -234,6 +245,49 @@ test('el ACK distingue acciones fuera de orden y descarta copias antiguas', () =
   addAck(acks, 'p1', 35);
   assert.equal(acknowledged(acks[0], 3), true);
   assert.equal(acknowledged(acks[0], 34), false);
+});
+
+test('los avatares del catálogo anterior mantienen índices, y los ajustes nuevos se validan en red', () => {
+  const legacy = cleanAvatar({ pelo: 9, cara: 5 });
+  assert.equal(legacy.pelo, 9);
+  assert.equal(legacy.cara, 0);
+  assert.equal(legacy.lentes, 1);
+  assert.equal(Object.hasOwn(legacy, 'custom'), false);
+  assert.equal(Object.hasOwn(legacy, 'style'), false);
+  assert.equal(Object.hasOwn(cleanAvatar({ style: '05' }), 'style'), false);
+  const overrides = { jaw: 0, cheek: -1, eyes: 3, brows: '1', nose: 1.2, lips: -2,
+    skin: '#decafe', hair: '#bad', suit: 'rgb(1,2,3)', glasses: '#abc123\n', hat: '#112233', tag: 'x' };
+  assert.deepEqual(cleanPlayer('peer', { area: 'tut', name: 'Vega', avatar: { custom: overrides } })?.avatar.custom,
+    { cheek: -1, lips: -2, skin: '#DECAFE', hat: '#112233' });
+  const state = createGame([{ id: 'peer', name: 'Vega', area: 'tut', avatar: legacy }]);
+  const packet = { e: 0, r: 1, a: [], s: encodeState(state) };
+  assert.deepEqual(readSnapshot(packet)?.s.players[0].avatar, legacy);
+  const retro = { ...legacy, style: 'retro' as const };
+  state.players[0].avatar = retro;
+  assert.deepEqual(readSnapshot({ ...packet, s: encodeState(state) })?.s.players[0].avatar, retro);
+});
+
+test('cuatro avatares con todos los ajustes caben en la instantánea con margen para una partida activa', () => {
+  const ids = ['100000000001', '100000000002', '100000000003', '100000000004'];
+  const state = createGame(ids.map(id => ({ id, name: '🌌'.repeat(18), area: 'tut', avatar: testAvatar })));
+  state.time = 84000100 - RULES.transitionMs;
+  launch(state);
+  tick(state, RULES.transitionMs);
+  // Los fuegos, eventos y acciones recientes pueden coexistir en el estado de respaldo.
+  state.time = 84000100;
+  state.fireSeq = 40;
+  state.eventSeq = 10000;
+  const fireCount = Math.ceil(RULES.initialHull / RULES.timeoutDamage);
+  state.fires = Array.from({ length: fireCount }, (_, index) => ({ id: index + 1, next: 84002100, slot: index }));
+  state.events = Array.from({ length: 7 }, (_, index) => ({ id: 9994 + index, kind: 'help', peer: ids[0], to: ids[1] }));
+  state.recent = Array.from({ length: 20 }, (_, index) => [index % 4, 'tut0', 84000000 + index]);
+  state.touches = Array.from({ length: 36 }, (_, index) => [index % 4, 'tut0', -1, 84000000 + index]);
+  const packet = { e: 42, r: 387, a: ids.map(id => [id, 1_000_000, 0xffffffff]), s: encodeState(state) };
+  assert.ok(jsonBytes(packet) < MAX_BODY_BYTES, `La instantánea ocupa ${jsonBytes(packet)} bytes`);
+  assert.ok(jsonBytes({ v: 1, p: ids[0], d: packet }) < 4096);
+  const decoded = readSnapshot(packet);
+  assert.ok(decoded);
+  assert.deepEqual(decoded.s.players.map(player => player.avatar), Array(4).fill(testAvatar));
 });
 
 test('un anfitrión en segundo plano, con un pulso por segundo, mantiene el reloj en tiempo real', async () => {

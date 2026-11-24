@@ -1,6 +1,6 @@
 import {
-  AVATAR_OPTIONS, CONFIG, CONTROLS, MAX_PLAYERS, PASS_SHIPS, POINTS, cleanAvatar, isAreaId,
-  type AreaId, type Avatar, type Control,
+  AVATAR_COLOR_KEYS, AVATAR_FACE_KEYS, AVATAR_OPTIONS, CONFIG, CONTROLS, MAX_PLAYERS, PASS_SHIPS,
+  POINTS, cleanAvatar, isAreaId, type AreaId, type Avatar, type AvatarOptionKey, type Control,
 } from "../config.ts";
 
 export const RULES = Object.freeze({
@@ -434,14 +434,21 @@ export function decodeAction(raw: unknown): GameAction | null {
 }
 
 const MAX_TIME = 24 * 60 * 60 * 1000;
-const avatarKeys = Object.keys(AVATAR_OPTIONS) as (keyof Avatar)[];
+const avatarKeys = Object.keys(AVATAR_OPTIONS) as AvatarOptionKey[];
+const customKeys = [...AVATAR_FACE_KEYS, ...AVATAR_COLOR_KEYS];
 
 // La instantánea de red usa índices de puesto y de avatar; la simulación sigue usando sus tipos normales.
 export function encodeState(state: GameState): unknown {
   const playerSlot = (peer: string | undefined) => state.players.findIndex(player => player.id === peer);
   return {
     ...state,
-    players: state.players.map(({ id, name, area, avatar }) => [id, name, area, avatarKeys.map(key => avatar[key])]),
+    players: state.players.map(({ id, name, area, avatar }) => {
+      const legacy = [id, name, area, avatarKeys.map(key => avatar[key])];
+      // Los campos opcionales se agregan después del catálogo que leen los clientes anteriores.
+      if (!avatar.custom && !avatar.style) return legacy;
+      const overrides = avatar.custom ? customKeys.map(key => avatar.custom?.[key] ?? null) : null;
+      return avatar.style === 'retro' ? [...legacy, overrides, 1] : [...legacy, overrides];
+    }),
     active: state.active.map(playerSlot),
     orders: state.orders.map(order => [
       order.id, playerSlot(order.reader), playerSlot(order.actor), order.control, order.value, order.due, order.extension,
@@ -465,7 +472,13 @@ function unpackState(s: Data): Data | null {
       item[3].length !== avatarKeys.length) return null;
     return {
       id: item[0], name: item[1], area: item[2],
-      avatar: Object.fromEntries(avatarKeys.map((key, index) => [key, item[3][index]])),
+      avatar: {
+        ...Object.fromEntries(avatarKeys.map((key, index) => [key, item[3][index]])),
+        custom: Array.isArray(item[4]) && item[4].length === customKeys.length
+          ? Object.fromEntries(customKeys.map((key, index) => [key, item[4][index]]))
+          : undefined,
+        style: item[5] === 1 ? 'retro' : undefined,
+      },
     };
   });
   if (roster.some(player => !player)) return null;

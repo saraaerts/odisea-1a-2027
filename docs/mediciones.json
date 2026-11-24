@@ -1,0 +1,416 @@
+{
+  "source": "a93c8e41be2136164cfe143809e5ef2d6e7f9e672fa339f8792c59346aff54f7",
+  "coverage": [
+    {
+      "pelo": 0,
+      "nombre": "Corto",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 1,
+      "nombre": "Flequillo",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 2,
+      "nombre": "Largo",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 3,
+      "nombre": "Rulos",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 4,
+      "nombre": "Rodete",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 5,
+      "nombre": "Rapado",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 6,
+      "nombre": "Afro",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 7,
+      "nombre": "Coleta",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 8,
+      "nombre": "Melena",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    },
+    {
+      "pelo": 9,
+      "nombre": "Cresta",
+      "libre": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "ajustado": {
+        "casos": 162,
+        "vertices": 5670,
+        "interior": 352512,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      },
+      "casco": {
+        "casos": 27,
+        "vertices": 945,
+        "interior": 58752,
+        "verticesAfuera": 0,
+        "puntosAfuera": 0,
+        "ejemplos": []
+      }
+    }
+  ],
+  "budget": {
+    "samples": 14080,
+    "table": [
+      {
+        "pelo": 0,
+        "nombre": "Corto",
+        "libre": 160,
+        "ajustado": 120,
+        "casco": 120
+      },
+      {
+        "pelo": 1,
+        "nombre": "Flequillo",
+        "libre": 160,
+        "ajustado": 140,
+        "casco": 120
+      },
+      {
+        "pelo": 2,
+        "nombre": "Largo",
+        "libre": 200,
+        "ajustado": 180,
+        "casco": 120
+      },
+      {
+        "pelo": 3,
+        "nombre": "Rulos",
+        "libre": 340,
+        "ajustado": 240,
+        "casco": 120
+      },
+      {
+        "pelo": 4,
+        "nombre": "Rodete",
+        "libre": 160,
+        "ajustado": 140,
+        "casco": 120
+      },
+      {
+        "pelo": 5,
+        "nombre": "Rapado",
+        "libre": 120,
+        "ajustado": 120,
+        "casco": 120
+      },
+      {
+        "pelo": 6,
+        "nombre": "Afro",
+        "libre": 340,
+        "ajustado": 240,
+        "casco": 120
+      },
+      {
+        "pelo": 7,
+        "nombre": "Coleta",
+        "libre": 180,
+        "ajustado": 160,
+        "casco": 120
+      },
+      {
+        "pelo": 8,
+        "nombre": "Melena",
+        "libre": 200,
+        "ajustado": 180,
+        "casco": 120
+      },
+      {
+        "pelo": 9,
+        "nombre": "Cresta",
+        "libre": 220,
+        "ajustado": 160,
+        "casco": 120
+      }
+    ],
+    "peak": {
+      "avatar": {
+        "pelo": 3,
+        "colorPelo": 1,
+        "piel": 2,
+        "cara": 0,
+        "detalle": 3,
+        "ropa": 5,
+        "colorRopa": 3,
+        "gorro": 0,
+        "colorGorro": 3,
+        "acc": 2,
+        "colorAcc": 1,
+        "lentes": 9,
+        "colorLentes": 0
+      },
+      "seated": true,
+      "measured": {
+        "cabeza": 245,
+        "pelo": 260,
+        "uniforme": 552,
+        "gorro": 0,
+        "accesorio": 216,
+        "lentes": 224,
+        "total": 1497,
+        "materiales": 1
+      }
+    },
+    "peakHead": {
+      "avatar": {
+        "pelo": 3,
+        "colorPelo": 1,
+        "piel": 2,
+        "cara": 0,
+        "detalle": 3,
+        "ropa": 5,
+        "colorRopa": 3,
+        "gorro": 0,
+        "colorGorro": 3,
+        "acc": 0,
+        "colorAcc": 1,
+        "lentes": 0,
+        "colorLentes": 0
+      },
+      "seated": true,
+      "measured": {
+        "cabeza": 245,
+        "pelo": 340,
+        "uniforme": 552,
+        "gorro": 0,
+        "accesorio": 0,
+        "lentes": 0,
+        "total": 1137,
+        "materiales": 1
+      }
+    }
+  }
+}

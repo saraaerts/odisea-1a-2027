@@ -13,6 +13,8 @@ npm run dev
 
 Abrí la URL que imprime Vite. **Iniciar práctica** funciona con bots. **Jugar en equipo** funciona entre pestañas del mismo navegador y origen hasta que configures Supabase. Para una partida real, 3–4 personas entran con el mismo código de sala. Cada grupo crea su propia sala; todos usan el mismo código de jornada para **Pantalla en vivo**. No hace falta elegir equipos por área. Para ensayar, podés despegar con dos personas.
 
+Entrá a **Vestuario → Ajuste fino** para cambiar mandíbula, pómulos, ojos, cejas, nariz y labios, o elegir colores propios de piel, pelo, ropa, gorros, accesorios y lentes. Podés girar la vista 3D y tocar **Probar en cabina** para practicar con tu avatar. Los ajustes se guardan en el dispositivo y aparecen cuando entrás a una partida. Para abrir directamente Ajuste fino, agregá `?vista=vestuario&modo=ajuste` a la URL del juego.
+
 Podés cambiar la calidad en **Configuración**. En Automática, el juego baja de preset según la fluidez; si sigue por debajo de 24 FPS, o si falla WebGL, pasa a 2D con las mismas órdenes, daños y manos. Si elegís un preset fijo que no sostiene 24 FPS, también entra el respaldo. La copia histórica está en [legacy/index.html](public/legacy/index.html); su antigua conexión está desactivada.
 
 ## Conectá Supabase

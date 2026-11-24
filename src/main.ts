@@ -20,6 +20,11 @@ const pages: Page[] = ['home', 'crew', 'profile', 'settings', 'projection', 'lob
 const mount = byId('app')!;
 mount.innerHTML = shell;
 const url = new URL(location.href);
+if (url.searchParams.has('restaurar') || url.searchParams.has('muestra')) {
+  url.searchParams.delete('restaurar');
+  url.searchParams.delete('muestra');
+  history.replaceState(null, '', url);
+}
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() as string | undefined;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() as string | undefined;
 const online = Boolean(supabaseUrl && supabaseKey);
@@ -55,6 +60,7 @@ function go(next: Page) {
   if (prev === 'live' && next !== 'live') closeProjection();
   page = next;
   for (const p of pages) show(p, p === next);
+  if (next === 'game' && prev === 'profile') window.scrollTo(0, 0);
   if (prev !== next && !['game', 'lobby', 'end'].includes(next)) {
     window.scrollTo(0, 0);
     byId(next)?.querySelector('h1')?.setAttribute('tabindex', '-1');
@@ -62,6 +68,14 @@ function go(next: Page) {
   }
   if (next === 'game' && !visual) startVisual();
   if (next === 'home') {
+    const current = new URL(location.href);
+    if (current.searchParams.get('vista') === 'vestuario') {
+      current.searchParams.delete('vista');
+      current.searchParams.delete('modo');
+      current.searchParams.delete('muestra');
+      current.searchParams.delete('categoria');
+      history.replaceState(null, '', current);
+    }
     label('home-alias', profile.name || 'Armá tu perfil');
     label('home-profile', profile.name ? areaName(profile.area) + ' · ' + wallet.points + ' puntos' : 'Elegí tu área y prepará tu avatar.');
   }
@@ -70,7 +84,14 @@ function go(next: Page) {
     fill(next + '-area', areas());
     field(next + '-area').value = profile.area;
   }
-  if (next === 'profile' && !wardrobe) wardrobe = mountWardrobe(byId('wardrobe')!, { onChange: () => { label('home-profile', areaName(profile.area) + ' · ' + wallet.points + ' puntos'); } });
+  if (next === 'profile' && !wardrobe) {
+    const query = new URLSearchParams(location.search);
+    wardrobe = mountWardrobe(byId('wardrobe')!, {
+      startFine: query.get('vista') === 'vestuario' && query.get('modo') === 'ajuste',
+      startClothes: query.get('categoria') === 'ropa',
+      onChange: () => label('home-profile', areaName(profile.area) + ' · ' + wallet.points + ' puntos'),
+    });
+  }
   if (next === 'settings') field('quality').value = settings.quality;
 }
 function closeProjection() {
@@ -392,7 +413,7 @@ mount.addEventListener('click', (ev) => {
     flightEffect = { id: ++effectId, kind: 'ok', seat: Math.max(0, lastState.players.findIndex((p) => p.id === identity)) };
     act({ type: 'control', stage: lastState.stage, control: hit.dataset.control, ...(hit.dataset.next ? { value: Number(hit.dataset.next) } : {}) });
   }
-  if (hit.id === 'practice') practice();
+  if (hit.id === 'practice' || hit.id === 'wardrobe-practice') practice();
   if (hit.id === 'sound') setMuted(!settings.muted);
   if (hit.id === 'close-settings') {
     if (behindSettings === 'game' && lastState?.phase === 'end') go('end');
@@ -439,4 +460,15 @@ if (url.searchParams.has('sala')) {
   field('crew-code').value = station(url.searchParams.get('sala') ?? '');
   field('crew-jornada').value = station(url.searchParams.get('jornada') ?? 'ODISEA') || 'ODISEA';
   go('crew');
-} else { go('home'); }
+} else if (url.searchParams.get('vista') === 'vestuario') {
+  go('profile');
+  if (url.searchParams.get('modo') === 'ajuste') {
+    requestAnimationFrame(() => {
+      if (page === 'profile') {
+        byId('wardrobe-tools')?.scrollIntoView({ block: 'start' });
+      }
+    });
+  }
+} else {
+  go('home');
+}

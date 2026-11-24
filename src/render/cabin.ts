@@ -65,7 +65,7 @@ export function mountCabin(canvas: HTMLCanvasElement, initial: CabinOptions = {}
   scene.add(stars, fleet.object, cockpit, effects.object);
 
   const fill = new T.HemisphereLight('#bdd8fe', '#695147', 2.0);
-  const key = new T.DirectionalLight('#e9f4ff', 2.7);
+  const key = new T.DirectionalLight('#f9e8d6', 2.7);
   key.position.set(-5, 9, 6);
   key.castShadow = true;
   Object.assign(key.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: .2, far: 23 });
@@ -74,7 +74,9 @@ export function mountCabin(canvas: HTMLCanvasElement, initial: CabinOptions = {}
   key.shadow.radius = 2.4;
   const accent = new T.PointLight('#3a93f2', 12, 10, 2);
   accent.position.set(1.7, 1.1, -2.75);
-  scene.add(fill, key, accent);
+  const consoleFill = new T.PointLight('#ffdcba', 5.2, 8.5, 2);
+  consoleFill.position.set(-1.25, 1.35, -2.65);
+  scene.add(fill, key, accent, consoleFill);
   renderer.info.autoReset = false;
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.18;
@@ -107,7 +109,8 @@ export function mountCabin(canvas: HTMLCanvasElement, initial: CabinOptions = {}
         let substitute = basicMaterials.get(original);
         if (!substitute) {
           substitute = new T.MeshLambertMaterial({ color: original.color, map: original.map, emissive: original.emissive,
-            emissiveIntensity: original.emissiveIntensity, side: original.side, vertexColors: original.vertexColors });
+            emissiveIntensity: original.emissiveIntensity, side: original.side, vertexColors: original.vertexColors,
+            alphaTest: original.alphaTest, alphaToCoverage: original.alphaToCoverage });
           basicMaterials.set(original, substitute);
         }
         materialDefaults.set(object, original);

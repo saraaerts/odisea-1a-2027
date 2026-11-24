@@ -42,3 +42,11 @@ Chromium de escritorio con SwiftShader renderiza WebGL por software. Las captura
 - Se adaptaron los campos opcionales `custom` y `style`, que el vestuario todavía no guarda.
 - 61.440 combinaciones (sentado y de pie) generadas sin errores ni valores inválidos. Peor caso: 1.435 triángulos, 5 mallas y 1 material.
 - Pasan `npm test`, avatares-3d, stage2, stage4, stage5, stage6 y fallback.
+
+## Versión completa con ajuste fino y pelo sin huecos (24/11/2026)
+
+- Se combinó el paquete «Odisea-1A-2027-Completo» con las correcciones de la v1.1 (reloj del anfitrión, reparto de pedidos, proyector, código en mayúscula). El paquete partía de la v1.0.
+- Pelo: el casquete envuelve el cráneo hasta la nuca; sin huecos en coronilla, nuca ni frente (`tests/avatar-cobertura.mjs`: 0 vértices afuera). Peor caso: 1.497 triángulos.
+- Vestuario: ajuste fino de rasgos y colores en dos pestañas. `tests/stage5.mjs` se actualizó para abrir la pestaña Colores y medir solo los controles visibles.
+- Pasan `npm test` (17), avatar-cobertura, avatares-3d, stage2, stage4, stage5, stage6 y fallback, y una partida completa de cuatro pestañas con proyector sin errores de consola.
+- Los archivos `src/render/retro-*` no se usan en el juego y no suman peso al build.

@@ -158,15 +158,12 @@ function palette(k: Kit, a: Avatar): Palette {
   };
 }
 
-// Vista frontal local: -Z. Las facetas grandes del cráneo sostienen todos los rasgos.
-function addFace(k: Kit, head: T.Group, a: Avatar, p: Palette) {
+const skullSides = 10;
+
+function skullRows(a: Avatar): Layer[] {
   const jaw = (custom(a)?.jaw ?? 0) * .009;
   const cheek = (custom(a)?.cheek ?? 0) * .006;
-  const eyes = (custom(a)?.eyes ?? 0) * .002;
-  const brows = (custom(a)?.brows ?? 0) * .005;
-  const nose = (custom(a)?.nose ?? 0) * .004;
-  const lips = (custom(a)?.lips ?? 0) * .0015;
-  const rows: Layer[] = [
+  return [
     { y: -.209, w: .062 + jaw, front: .098, back: .048 },
     { y: -.170, w: .105 + jaw, front: .129, back: .078 },
     { y: -.091, w: .145 + jaw * .6, front: .144, back: .114 },
@@ -175,23 +172,33 @@ function addFace(k: Kit, head: T.Group, a: Avatar, p: Palette) {
     { y: .143, w: .156, front: .136, back: .143 },
     { y: .224, w: .105, front: .067, back: .100 },
   ];
-  const columns = 10;
+}
+
+function skullPoint(row: Layer, col: number): V {
+  const angle = col / skullSides * Math.PI * 2;
+  const z = -Math.cos(angle);
+  return [Math.sin(angle) * row.w, row.y, z * (z < 0 ? row.front : row.back)];
+}
+
+// Vista frontal local: -Z. Las facetas grandes del cráneo sostienen todos los rasgos.
+function addFace(k: Kit, head: T.Group, a: Avatar, p: Palette) {
+  const eyes = (custom(a)?.eyes ?? 0) * .002;
+  const brows = (custom(a)?.brows ?? 0) * .005;
+  const nose = (custom(a)?.nose ?? 0) * .004;
+  const lips = (custom(a)?.lips ?? 0) * .0015;
+  const rows = skullRows(a);
+  const columns = skullSides;
   k.add(head, k.layers(rows, columns), p.skin, [0, 0, 0]);
-  const sample = (row: Layer, col: number): V => {
-    const angle = col / columns * Math.PI * 2;
-    const z = -Math.cos(angle);
-    return [Math.sin(angle) * row.w, row.y, z * (z < 0 ? row.front : row.back)];
-  };
   // Intersección del punto (x,y) con los mismos triángulos que forman el cráneo.
   function facialDepth(x: number, y: number) {
     const row = rows.findIndex(item => item.y >= y);
     if (row <= 0) return -.10;
     let nearest = Infinity;
     for (let col = 0; col < columns; col++) {
-      const low = sample(rows[row - 1], col);
-      const high = sample(rows[row], col);
-      const highNext = sample(rows[row], col + 1);
-      const lowNext = sample(rows[row - 1], col + 1);
+      const low = skullPoint(rows[row - 1], col);
+      const high = skullPoint(rows[row], col);
+      const highNext = skullPoint(rows[row], col + 1);
+      const lowNext = skullPoint(rows[row - 1], col + 1);
       for (const [v0, v1, v2] of [[low, high, highNext], [low, highNext, lowNext]]) {
         const det = (v1[1] - v2[1]) * (v0[0] - v2[0]) + (v2[0] - v1[0]) * (v0[1] - v2[1]);
         if (Math.abs(det) < 1e-8) continue;
@@ -287,36 +294,71 @@ function addFace(k: Kit, head: T.Group, a: Avatar, p: Palette) {
   if (a.detalle === 6) decal([[.087, -.077], [.115, -.062], [.123, -.073], [.094, -.089]], p.white, .007);
 }
 
-function addHair(k: Kit, head: T.Group, a: Avatar, p: Palette, fit: 'libre' | 'ajustado' | 'casco') {
-  if (fit === 'casco') return;
-  const tight = fit === 'ajustado';
-  const style = a.pelo;
-  const scalp: V[] = [];
+function hairline(angle: number) {
+  const front = Math.cos(angle);
+  // Mantené frente y patillas. Redondeá los laterales hacia una nuca baja
+  // que cubre todo el arco posterior a y ≈ -.160.
+  if (front >= 0) return .023 + front * .096;
+  const rear = Math.min(1, -front / .84);
+  return .023 - .183 * rear * rear * (3 - 2 * rear);
+}
+
+function scalpGeometry(k: Kit, a: Avatar, thickness: number) {
+  const rows = skullRows(a);
+  const points: V[] = [[0, -.010, 0]];
   const faces: number[][] = [];
-  const sides = 10;
-  const maxY = tight ? .229 : style === 5 ? .233 : .251;
-  for (let row = 0; row < 3; row++) for (let i = 0; i < sides; i++) {
-    const theta = i / sides * Math.PI * 2;
-    const front = Math.cos(theta);
-    const hairline = .119 - (1 - front) * .096;
-    const radius = [1, .818, .40][row];
-    const y = [hairline, .177 + .012 * front, maxY][row];
-    scalp.push([Math.sin(theta) * (tight ? .180 : .186) * radius, y, .010 - front * .178 * radius]);
-    if (row) {
-      const from = (row - 1) * sides + i, next = (row - 1) * sides + (i + 1) % sides;
-      faces.push([from, from + sides, next + sides, next]);
+  const shell = rows.map((row, r) => Array.from({ length: skullSides }, (_, col) => {
+    const angle = col / skullSides * Math.PI * 2;
+    const [x, y, z] = skullPoint(row, col);
+    const top = r === rows.length - 1;
+    const scale = 1 + thickness * (top ? .72 : 1) / Math.hypot(x, z);
+    const point: V = [x * scale, y + (top ? thickness * .9 : 0), z * scale];
+    // Una tolerancia corta evita rendijas cuando el contorno se expande.
+    return { point, height: y - hairline(angle) + .003 };
+  }));
+  type Sample = typeof shell[number][number];
+  function clipFace(vertices: [Sample, Sample, Sample]) {
+    const rim: Sample[] = [];
+    vertices.forEach((from, i) => {
+      const to = vertices[(i + 1) % vertices.length];
+      if (from.height >= 0) rim.push(from);
+      if ((from.height >= 0) !== (to.height >= 0)) {
+        const t = from.height / (from.height - to.height);
+        const point = from.point.map((value, axis) => T.MathUtils.lerp(value, to.point[axis], t)) as V;
+        rim.push({ point, height: 0 });
+      }
+    });
+    if (rim.length < 3) return;
+    const face = rim.map(({ point }) => points.push(point) - 1);
+    faces.push(face);
+    for (let i = 0; i < rim.length; i++) {
+      const next = (i + 1) % rim.length;
+      if (rim[i].height === 0 && rim[next].height === 0) faces.push([0, face[next], face[i]]);
     }
   }
-  faces.push(Array.from({ length: sides }, (_, i) => 3 * sides - 1 - i));
-  // Cerrá el borde interior con un centro oculto por el cráneo.
-  const inner = scalp.push([0, .024, .010]) - 1;
-  for (let i = 0; i < sides; i++) faces.push([inner, i, (i + 1) % sides]);
-  k.add(head, k.mesh(scalp, faces), p.hair, [0, 0, 0]);
+  // Recortá las mismas diagonales que usa el cráneo. Así el casquete conserva
+  // sus facetas, sigue los ajustes de mandíbula y pómulos y cierra la nuca.
+  for (let r = 1; r < rows.length; r++) for (let col = 0; col < skullSides; col++) {
+    const next = (col + 1) % skullSides;
+    const a = shell[r - 1][col], b = shell[r][col], c = shell[r][next], d = shell[r - 1][next];
+    clipFace([a, b, c]);
+    clipFace([a, c, d]);
+  }
+  faces.push(shell.at(-1)!.map(({ point }) => points.push(point) - 1).reverse());
+  return k.mesh(points, faces);
+}
+
+function addHair(k: Kit, head: T.Group, a: Avatar, p: Palette, fit: 'libre' | 'ajustado' | 'casco') {
+  const tight = fit === 'ajustado';
+  const style = a.pelo;
+  const thickness = style === 5 || fit === 'casco' ? .008 : tight ? .007 : .010;
+  // El casco oculta el peinado. Su forro cubre la coronilla en la abertura.
+  const color = fit === 'casco' ? k.shade(p.hat, -.027) : p.hair;
+  k.add(head, scalpGeometry(k, a, thickness), color, [0, 0, 0]);
+  if (style === 5 || fit === 'casco') return;
   const lit = k.shade(p.hair, .027), shadow = k.shade(p.hair, -.025);
   const lock = (pos: V, size: V, rot: V, i: number) => k.add(head, poly,
     i % 5 === 2 ? lit : i % 4 === 3 ? shadow : p.hair, pos, size, rot);
-  if (style === 5) return;
-
   if (style === 3 || style === 6) {
     const puff = style === 6 ? 1.20 : 1;
     // Una hilera baja abraza la nuca y sienes; los bloques de arriba forman el copete.
@@ -325,8 +367,9 @@ function addHair(k: Kit, head: T.Group, a: Avatar, p: Palette, fit: 'libre' | 'a
       // Despejá las orejas: las copas y los aros tienen su propio volumen lateral.
       if ((a.acc === 1 || a.acc === 2) && (i < 2 || i > 3)) continue;
       const x = Math.sin(angle) * (tight ? .149 : .161) * (tight ? 1 : puff);
-      const z = .028 - Math.cos(angle) * (tight ? .138 : .144) * puff;
-      const y = .009 + .027 * Math.cos(angle) + .012 * Math.sin(i * 2.2);
+      const rear = Math.max(0, -Math.cos(angle));
+      const z = .028 - Math.cos(angle) * (tight ? .138 : .144) * puff - .012 * rear;
+      const y = .009 + .027 * Math.cos(angle) + .012 * Math.sin(i * 2.2) - .049 * rear;
       lock([x, y, z], [tight ? .051 : .073, (.101 + .014 * Math.sin(i * 2)) * puff, .070],
         [.35 * Math.sin(i), angle, -.25 * Math.cos(angle)], i);
     }
@@ -475,12 +518,13 @@ function addHeadwear(k: Kit, head: T.Group, a: Avatar, p: Palette) {
       break;
     }
     case 6: { // Casco continuo: deja la cara visible en la abertura biselada.
-      const ring = (sx: number, sy: number, z: number, y = 0) =>
-        helmetWindow.map(([x, h]): V => [x * sx, h * sy + y, z]);
+      const ring = (sx: number, sy: number, z: number, y = 0, roof = 0) =>
+        helmetWindow.map(([x, h], i): V => [x * sx, h * sy + y + (i < 2 ? roof : 0), z]);
       const rim = ring(1, 1, -.214);
-      const crown = ring(1.23, 1.23, -.167, .006);
-      const hull = ring(1.277, 1.355, .076, .014);
-      const back = ring(.79, .94, .220, .015);
+      // Dale espacio al forro en el techo y conservá la abertura del visor.
+      const crown = ring(1.23, 1.23, -.167, .006, .018);
+      const hull = ring(1.277, 1.355, .076, .014, .020);
+      const back = ring(.79, .94, .220, .015, .011);
       const n = rim.length;
       const faces: number[][] = [];
       for (let row = 0; row < 3; row++) for (let i = 0; i < n; i++) {

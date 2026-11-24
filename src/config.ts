@@ -131,7 +131,14 @@ export const POINTS = {
   nave_rota: 5,
 } as const;
 
-export type Avatar = { [Key in keyof typeof AVATAR_OPTIONS]: number };
+export const AVATAR_FACE_KEYS = ["jaw", "cheek", "eyes", "brows", "nose", "lips"] as const;
+export const AVATAR_COLOR_KEYS = ["skin", "hair", "suit", "hat", "accessory", "glasses"] as const;
+
+export type AvatarFaceKey = typeof AVATAR_FACE_KEYS[number];
+export type AvatarColorKey = typeof AVATAR_COLOR_KEYS[number];
+export type AvatarOptionKey = keyof typeof AVATAR_OPTIONS;
+export type AvatarCustom = Partial<Record<AvatarFaceKey, number> & Record<AvatarColorKey, string>>;
+export type Avatar = { [Key in AvatarOptionKey]: number } & { custom?: AvatarCustom; style?: 'retro' };
 
 export interface Control {
   id: string;
@@ -161,8 +168,25 @@ export function areaName(id: AreaId): string {
   return CONFIG.areas.find(area => area.id === id)!.nombre;
 }
 
+export function cleanAvatarCustom(raw: unknown): AvatarCustom | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const data = raw as Record<string, unknown>;
+  const custom: AvatarCustom = {};
+  for (const key of AVATAR_FACE_KEYS) {
+    const value = Object.hasOwn(data, key) ? data[key] : undefined;
+    if (typeof value === "number" && Number.isInteger(value) && value >= -2 && value <= 2 && value !== 0) {
+      custom[key] = value;
+    }
+  }
+  for (const key of AVATAR_COLOR_KEYS) {
+    const value = Object.hasOwn(data, key) ? data[key] : undefined;
+    if (typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value)) custom[key] = value.toUpperCase();
+  }
+  return Object.keys(custom).length ? custom : undefined;
+}
+
 export function cleanAvatar(raw: unknown): Avatar {
-  const entries = Object.keys(AVATAR_OPTIONS) as (keyof Avatar)[];
+  const entries = Object.keys(AVATAR_OPTIONS) as AvatarOptionKey[];
   const data = raw && typeof raw === "object" ? { ...raw as Partial<Avatar> } : {};
 
   // Migración del primer catálogo 2D, que tenía lentes como expresión.
@@ -171,10 +195,16 @@ export function cleanAvatar(raw: unknown): Avatar {
     else if (data.cara > 5) data.cara -= 1;
   }
 
-  return Object.fromEntries(entries.map(key => {
+  const avatar = Object.fromEntries(entries.map(key => {
     const value = data[key];
     const valid = typeof value === "number" && Number.isInteger(value) && value >= 0 &&
       value < AVATAR_OPTIONS[key].length;
     return [key, valid ? value : 0];
-  })) as Avatar;
+  })) as Record<AvatarOptionKey, number>;
+  const custom = cleanAvatarCustom(data.custom);
+  return {
+    ...avatar,
+    ...(custom ? { custom } : {}),
+    ...(data.style === 'retro' ? { style: 'retro' as const } : {}),
+  };
 }

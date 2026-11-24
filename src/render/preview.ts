@@ -3,7 +3,7 @@ import type { Avatar } from '../config.ts';
 import { makePilot } from './avatar.ts';
 import { release } from './model.ts';
 
-export function mountAvatarPreview(canvas: HTMLCanvasElement, avatar: Avatar) {
+export function mountAvatarPreview(canvas: HTMLCanvasElement, avatar: Avatar, initialZoom = 1.25) {
   const renderer = new T.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setClearColor(0, 0);
   renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -18,6 +18,9 @@ export function mountAvatarPreview(canvas: HTMLCanvasElement, avatar: Avatar) {
   scene.add(fill, key, accent);
   let model: ReturnType<typeof makePilot> | undefined;
   let disposed = false;
+  let angle = .44;
+  let zoom = initialZoom;
+  let framing: 'portrait' | 'body' = 'portrait';
 
   function draw() {
     if (disposed) return;
@@ -26,8 +29,11 @@ export function mountAvatarPreview(canvas: HTMLCanvasElement, avatar: Avatar) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    camera.position.set(.13, .89, -2.29 * Math.max(1, 1 / camera.aspect));
-    camera.lookAt(0, .62, 0);
+    const outfit = framing === 'body';
+    const targetY = outfit ? .58 + Math.min(.10, (zoom - 1) * .06) : .77 + Math.min(.18, (zoom - 1) * .15);
+    camera.zoom = zoom * (outfit ? .68 : 1);
+    camera.position.set(.08, targetY + .012, -(outfit ? 2.15 : 1.97) * Math.max(1, .95 / camera.aspect));
+    camera.lookAt(0, targetY, 0);
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
   }
@@ -38,7 +44,7 @@ export function mountAvatarPreview(canvas: HTMLCanvasElement, avatar: Avatar) {
     model = makePilot(0, next);
     model.pose(0, 0, true);
     model.object.position.set(0, 0, 0);
-    model.object.rotation.y = .44;
+    model.object.rotation.y = angle;
     scene.add(model.object);
     draw();
   }
@@ -49,6 +55,21 @@ export function mountAvatarPreview(canvas: HTMLCanvasElement, avatar: Avatar) {
 
   return {
     update,
+    setZoom(factor: number) {
+      zoom = factor;
+      draw();
+    },
+    setView(view: 'portrait' | 'body') {
+      if (framing === view) return;
+      framing = view;
+      draw();
+    },
+    rotateBy(radians: number) {
+      if (!model || disposed) return;
+      angle = (angle + radians) % (2 * Math.PI);
+      model.object.rotation.y = angle;
+      draw();
+    },
     destroy() {
       if (disposed) return;
       disposed = true;
