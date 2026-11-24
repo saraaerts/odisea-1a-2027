@@ -138,7 +138,8 @@ export function ordersRequired(players: number): number {
 }
 
 export function orderDurationMs(stage: number, adjustmentMs: number): number {
-  return Math.max(5000, 10000 + adjustmentMs - 600 * stage);
+  // Más lento para grupos que juegan por primera vez: 13 s en Despegue y 9,5 s en Reinscripción.
+  return Math.max(7000, 13000 + adjustmentMs - 500 * stage);
 }
 
 function activeAt(control: Control, stage: number): boolean {

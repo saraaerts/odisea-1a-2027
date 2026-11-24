@@ -54,10 +54,10 @@ test("cuatro bots coordinan los puestos y completan las ocho etapas", () => {
   assert.equal(state.ships, 40);
   assert.equal(state.hull, 100);
   assert.deepEqual(outcome(state), { title: "Misión perfecta", points: 100, kind: "meta" });
-  assert.equal(orderDurationMs(0, 0), 10000);
-  assert.equal(orderDurationMs(7, 0), 5800);
-  assert.equal(orderDurationMs(7, -2000), 5000);
-  assert.equal(orderDurationMs(0, 3000), 13000);
+  assert.equal(orderDurationMs(0, 0), 13000);
+  assert.equal(orderDurationMs(7, 0), 9500);
+  assert.equal(orderDurationMs(7, -2000), 7500);
+  assert.equal(orderDurationMs(0, 3000), 16000);
 });
 
 test("la gracia de 800 ms permite actuar con el reloj en cero", () => {
