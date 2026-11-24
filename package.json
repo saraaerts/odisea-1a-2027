@@ -1,0 +1,28 @@
+{
+  "name": "odisea-1a-2027-3d",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.ts",
+    "test:2d": "node tests/stage2.mjs",
+    "test:respaldo": "node tests/fallback.mjs",
+    "test:visual": "node tests/visual.mjs"
+  },
+  "dependencies": {
+    "@fontsource/poppins": "5.1.1",
+    "@supabase/supabase-js": "2.45.4",
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/three": "0.170.0",
+    "playwright": "1.51.1",
+    "typescript": "5.7.3",
+    "vite": "6.4.3"
+  }
+}

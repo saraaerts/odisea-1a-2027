@@ -1,0 +1,3074 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Odisea 1A 2027: equipo espacial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#0056F3; --cyan:#49E3E7; --mint:#79FFBA; --navy:#062149; --space:#0a1226;
+  --ink:#f5f8ff; --soft:#c1cde1; --muted:#a5b6d0; --line:#34496a;
+  --card:#111e33; --warn:#F2B33D; --bad:#E4572E;
+  --dmg:0;
+  box-sizing:border-box;
+  color-scheme:dark;
+}
+*,*::before,*::after { box-sizing:inherit }
+html { min-height:100% }
+body {
+  min-height:100vh; margin:0;
+  background:var(--space); color:var(--ink);
+  font-family:Poppins,Arial,Helvetica,sans-serif;
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+}
+body::after {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:4;
+  box-shadow:inset 0 0 55px rgba(228,87,46,.47);
+  opacity:var(--dmg); transition:opacity .3s ease;
+}
+#sky { position:fixed; inset:0; z-index:0; pointer-events:none }
+.wrap {
+  position:relative; z-index:1; max-width:950px; margin:auto;
+  padding:calc(24px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
+    calc(28px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+}
+body.ingame .wrap { max-width:650px; padding-top:calc(60px + env(safe-area-inset-top)) }
+.wrap > section { animation:screen-in .26s ease-out both }
+.wrap > #s-live { animation:none }
+@keyframes screen-in { from { opacity:0; transform:translateY(5px) } }
+[hidden] { display:none !important }
+button,input { font:inherit }
+button { touch-action:manipulation }
+button[disabled] { opacity:.55; cursor:not-allowed }
+button:focus-visible,input:focus-visible {
+  outline:2px solid var(--cyan); outline-offset:3px;
+}
+h1,h2,h3,p { margin:0 }
+h1 { font-size:clamp(29px,5vw,48px); line-height:1.1; font-weight:700; letter-spacing:-.035em }
+h2 { font-size:clamp(23px,4vw,32px); line-height:1.15; letter-spacing:-.025em }
+h3 { font-size:16px; margin:18px 0 9px; font-weight:600 }
+p { color:var(--soft); font-size:14px; line-height:1.55; margin:0 0 10px }
+.tag {
+  display:inline-block; margin:0 0 9px 3px; padding:4px 13px;
+  background:var(--mint); color:var(--navy); transform:skewX(-14deg);
+  font-size:12px; line-height:1.35; font-weight:700; letter-spacing:.045em;
+}
+.tag span { display:inline-block; transform:skewX(14deg) }
+.panel {
+  background:linear-gradient(145deg,#18283f,var(--card) 62%); border:1px solid var(--line);
+  border-radius:12px; margin-top:14px; padding:clamp(12px,3.5vw,24px);
+  box-shadow:inset 0 1px 0 #ffffff0e,0 15px 40px #0004;
+}
+.row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px }
+.cta,.ghost,.gear,.chip {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px;
+  padding:8px 14px; border:1px solid #536a8e; border-radius:7px; cursor:pointer;
+  color:var(--ink); font-weight:600; font-size:14px; line-height:1.2; text-align:center;
+  background:linear-gradient(#283c57,#192942); box-shadow:inset 0 1px 0 #ffffff18,0 2px 0 #060d1a;
+}
+.cta { border-color:#4087ff; background:linear-gradient(var(--blue),#0045c5); box-shadow:inset 0 1px 0 #a1c3ff70,0 2px 0 #031641 }
+.cta.sm,.ghost.sm,.chip { font-size:13px }
+.chip[aria-pressed="true"] { border-color:var(--mint); color:var(--mint); box-shadow:inset 0 -2px 0 var(--mint) }
+:is(.cta,.ghost,.gear,.chip):active { box-shadow:inset 0 2px 7px #020712; transform:translateY(1px) }
+@media (hover:hover) {
+  :is(.ghost,.gear,.chip):hover:not([disabled]) { border-color:#90a8ce }
+  .cta:hover:not([disabled]) { background:#135fe9 }
+}
+.gear {
+  position:absolute; top:calc(8px + env(safe-area-inset-top)); right:max(12px,env(safe-area-inset-right));
+  z-index:7; font-size:12px;
+}
+.gear svg { width:18px; height:18px }
+label.f { display:block; margin:0 0 12px; color:var(--ink); font-weight:600; font-size:14px }
+input.t {
+  display:block; width:100%; min-width:0; min-height:44px; margin-top:5px; padding:8px 11px;
+  border-radius:6px; border:1px solid #647c9f; background:#0a1528; color:var(--ink); font-size:16px;
+  box-shadow:inset 0 2px 3px #0005;
+}
+input.t::placeholder { color:#aebfda; opacity:1 }
+input.code { text-transform:uppercase; letter-spacing:.2em; font-weight:700; text-align:center }
+.err { color:#ffd18a; font-weight:600; margin:8px 0 0 }
+.err:empty { display:none }
+
+/* Creador de tripulante */
+#s-profile > p { margin-top:8px }
+.studio { display:grid; gap:12px; align-items:start; margin:0 0 16px }
+.profile-area-label { margin:0 0 8px; color:var(--ink); font-size:14px; font-weight:600 }
+.stagecol {
+  display:grid; grid-template-columns:1fr auto; gap:9px; align-items:center;
+  padding:10px; border:1px solid #415b7b; border-radius:8px;
+  background:linear-gradient(145deg,#12233a,#0a1324);
+}
+.preview {
+  position:relative; isolation:isolate; grid-column:1/-1;
+  width:min(100%,180px); aspect-ratio:1; justify-self:center; overflow:hidden;
+  background:
+    radial-gradient(circle,transparent 51%,#68cbe557 51.4% 52%,transparent 52.5% 59%,#5a8aab50 59.5% 60%,transparent 60.5%),
+    radial-gradient(circle at 55% 40%,#29506e,#10263e 55%,#081220 84%);
+  border-radius:50%; border:1px solid #6884a2;
+  box-shadow:0 0 0 4px #0b1627,0 0 0 5px #334a66;
+}
+.preview::before {
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:repeating-linear-gradient(90deg,#9ee8ff14 0 1px,transparent 1px 16px),
+    repeating-linear-gradient(0deg,#9ee8ff14 0 1px,transparent 1px 16px);
+}
+.preview svg,.av svg,.thumb svg { display:block; width:100%; height:100% }
+.pts { margin:0; color:#ffcf7a; font-size:14px; font-weight:600 }
+.box { border:1px solid #405878; border-radius:8px; background:#0d192d; min-width:0 }
+.tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; padding:6px; border-bottom:1px solid #344a69 }
+.tab {
+  min-width:0; min-height:44px; border:1px solid transparent; border-radius:5px; padding:4px 2px;
+  background:transparent; color:var(--soft); font-size:clamp(10px,3.2vw,13px); font-weight:600; cursor:pointer;
+}
+.tab[aria-selected="true"] { background:#173758; color:var(--ink); border-color:#5098c2; box-shadow:inset 0 -2px 0 var(--cyan) }
+.tabpanel { padding:10px }
+.tp-title { margin:0 0 7px; color:var(--ink); font-weight:600; font-size:13px }
+.thumbs { display:grid; grid-template-columns:repeat(auto-fit,minmax(64px,1fr)); gap:6px; margin:0 0 13px }
+.thumb {
+  position:relative; min-width:0; min-height:44px; aspect-ratio:1.06; padding:0;
+  border:2px solid #3a5270; border-radius:5px; overflow:hidden; cursor:pointer;
+  background:radial-gradient(ellipse at 50% 35%,#294760,#10243a 82%);
+}
+.thumb[aria-pressed="true"] { border-color:var(--mint); box-shadow:0 0 0 1px var(--mint) }
+.thumb[aria-pressed="true"]::after {
+  content:""; position:absolute; width:8px; height:5px; left:4px; top:5px;
+  border:solid var(--mint); border-width:0 0 2px 2px; transform:rotate(-45deg);
+}
+.thumb .nm {
+  position:absolute; inset:auto 0 0; padding:2px 3px; background:#081425ef; color:var(--ink);
+  font-size:10px; line-height:1.25; font-weight:600; overflow-wrap:anywhere;
+}
+.thumb.locked svg { opacity:.7 }
+.thumb .price {
+  position:absolute; top:2px; right:2px; padding:0 3px; border-radius:3px;
+  background:var(--warn); color:var(--navy); font-size:10px; font-weight:700;
+}
+.swatches { display:flex; flex-wrap:wrap; gap:7px }
+.sw { position:relative; width:44px; height:44px; padding:0; border:2px solid #7188a8; border-radius:7px; cursor:pointer }
+.sw[aria-pressed="true"] { border-color:#fff; box-shadow:0 0 0 2px var(--mint) }
+.sw[aria-pressed="true"]::after {
+  content:""; position:absolute; left:14px; top:12px; width:13px; height:8px;
+  border:solid #fff; border-width:0 0 3px 3px; transform:rotate(-45deg); filter:drop-shadow(0 0 2px #000) drop-shadow(0 1px 1px #000);
+}
+.buybar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px; border-top:1px solid #846944; background:#30281d; font-size:13px }
+.areas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px }
+.area {
+  min-width:0; min-height:44px; padding:8px; cursor:pointer; text-align:left;
+  color:var(--ink); border:1px solid #435a7a; border-radius:5px; background:#0f1d31;
+}
+.area b { display:block; font-size:13px; font-weight:600 }
+.area span { display:block; margin-top:3px; color:var(--soft); font-size:11px; line-height:1.4 }
+.area[aria-pressed="true"] { border-color:var(--mint); background:#17383b; box-shadow:inset 3px 0 0 var(--mint) }
+.area[aria-pressed="true"] b::after { content:" ✓" }
+@media (min-width:660px) {
+  .studio { grid-template-columns:minmax(185px,1fr) minmax(0,2.05fr) }
+  .stagecol { position:sticky; top:12px }
+  .preview { width:min(100%,220px) }
+  .areas { grid-template-columns:repeat(4,minmax(0,1fr)) }
+  .thumbs { grid-template-columns:repeat(auto-fill,minmax(82px,1fr)) }
+}
+
+/* Inicio y sala de espera */
+.lobby-hero {
+  position:relative; isolation:isolate; min-height:177px; display:grid; align-content:end;
+  overflow:hidden; border:1px solid #3f6085; border-radius:12px; padding:18px;
+  background:radial-gradient(ellipse at 76% 31%,#142d4d,#091429 64%);
+}
+.lobby-hero .tag { justify-self:start }
+.lobby-hero h1 { max-width:16ch; text-wrap:balance; text-shadow:0 2px 10px #020916 }
+.lobby-orbit { position:absolute; z-index:-1; right:-8px; top:-20%; width:min(76%,440px); height:142%; opacity:.95 }
+.lobby-intro { margin:11px 0 0; max-width:72ch }
+#s-lobby .panel .me {
+  display:flex; align-items:center; gap:10px; min-width:0; margin-bottom:14px;
+  padding:8px; border:1px solid #3d5574; border-radius:8px; background:#0c182a;
+}
+.av { background:radial-gradient(circle at 50% 42%,#294961,#122641 66%,#0b1524) }
+#s-lobby .me .av { width:53px; height:53px; border-radius:50%; border:1px solid #6d93ac; overflow:hidden; flex:none }
+#s-lobby .me strong { display:block; overflow-wrap:anywhere; font-size:15px; line-height:1.3 }
+#s-lobby .me small { display:block; color:var(--soft); font-size:12px }
+#s-lobby .me .ghost { margin-left:auto }
+#s-lobby .me .mepts,.ptsline { color:#ffcf7a; font-weight:600 }
+.lobby-actions { display:grid; grid-template-columns:1fr 1fr; margin:0 }
+.lobby-actions .cta { grid-column:1/-1 }
+.or { display:flex; align-items:center; gap:9px; margin:13px 0 8px; color:var(--soft); font-size:12px }
+.or::before,.or::after { content:""; flex:1; height:1px; background:#405675 }
+.join { display:flex; gap:8px }
+.join input { flex:1; margin:0 }
+.wait-head {
+  padding:13px 16px 14px; border:1px solid #4d7198; border-radius:9px;
+  background:linear-gradient(120deg,#112c4a,#0e1b30 74%); text-align:center;
+}
+.wait-head > p:not(.bigcode) { margin:0 }
+.bigcode {
+  margin:0; color:var(--mint); font-size:clamp(37px,10vw,56px);
+  font-weight:700; line-height:1.17; letter-spacing:.17em; padding-left:.17em;
+}
+.counter { display:flex; align-items:baseline; gap:8px; margin-bottom:12px }
+.counter strong { color:var(--cyan); font-size:33px; line-height:1; font-variant-numeric:tabular-nums }
+.counter span { color:var(--soft); font-size:14px }
+.slots { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px }
+.slot {
+  display:flex; flex-direction:column; align-items:center; gap:4px; padding:7px 3px;
+  border:1px solid #3d5678; border-radius:6px; background:#0e1d32; text-align:center; min-width:0;
+}
+.slot .av { width:min(100%,50px); aspect-ratio:1; border:1px solid #668ca7; border-radius:50%; overflow:hidden }
+.slot b,.slot small { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.slot b { font-size:11px; font-weight:600 }
+.slot small { color:var(--mint); font-size:10px }
+.slot.empty { border-style:dashed; background:#0c1627; color:var(--muted) }
+.slot.empty .av {
+  position:relative; border-color:#405475; background:#172640;
+}
+.slot.empty .av::before,.slot.empty .av::after {
+  content:""; position:absolute; inset:48% 33%; background:#8aa3c7;
+}
+.slot.empty .av::after { transform:rotate(90deg) }
+.slot.new { animation:screen-in .24s ease-out both }
+@media (min-width:660px) {
+  #s-lobby { max-width:740px; margin:auto }
+  .lobby-hero { min-height:224px; padding:26px }
+  .lobby-actions { grid-template-columns:repeat(3,minmax(0,1fr)) }
+  .lobby-actions .cta { grid-column:auto }
+}
+
+/* Cabina y tablero */
+.cockpit {
+  position:relative; isolation:isolate; height:clamp(210px,59vw,300px); border-radius:12px; overflow:hidden;
+  background:#050b1b; border:1px solid #627895; box-shadow:0 6px 18px #0007;
+}
+.cockpit canvas { display:block; position:absolute; inset:0; width:100%; height:100%; pointer-events:none }
+.cockpit::before,.cockpit::after {
+  content:""; position:absolute; z-index:1; pointer-events:none; inset:0;
+}
+.cockpit::before {
+  background:linear-gradient(180deg,#030710c9,transparent 15%),
+    linear-gradient(103deg,transparent 20%,#cdefff16 31%,transparent 46%),
+    linear-gradient(90deg,#02081780,transparent 18% 83%,#02081785);
+}
+.cockpit::after {
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 2px #090f1a,inset 0 0 0 3px #95b0c84a,inset 0 8px 10px #0006;
+}
+.strut {
+  position:absolute; top:-10%; bottom:28%; width:8.5%; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(90deg,#101624,#465569 18%,#232d3c 22%,#141e2c 65%,#60778b 68%,#222f43 75%,#0c1422 92%);
+  box-shadow:5px 0 9px #0007;
+}
+.strut.l { left:-4%; transform:skewX(-14deg); transform-origin:bottom left }
+.strut.r { right:-4%; transform:skewX(14deg); transform-origin:bottom right }
+.strut::before {
+  content:""; position:absolute; inset:22% 34% 36% 29%;
+  background:repeating-linear-gradient(180deg,#0c1320 0 5px,#3e5066 5px 7px);
+  border:1px solid #586a80; border-radius:2px;
+}
+.dash {
+  position:absolute; inset:auto 0 0; height:31%; z-index:1; pointer-events:none;
+  border-top:3px solid #6b7d91;
+  background:
+    radial-gradient(ellipse at 50% 0,#77dcff3a,transparent 58%),
+    linear-gradient(180deg,#1e2e40 0,#33465a 7%,#172432 12%,#091523 70%,#050b15);
+  box-shadow:0 -4px 11px #0008,inset 0 1px 0 #cbe0ee77;
+}
+.dash::before,.dash::after {
+  content:""; position:absolute; top:16%; bottom:15%; width:21%;
+  border:2px solid #566d85; border-radius:4px; transform:skewX(-14deg);
+  background:repeating-linear-gradient(0deg,transparent 0 4px,#63edff32 5px 6px),
+    linear-gradient(120deg,#14314b,#0a1826); box-shadow:0 3px 0 #030912,inset 0 0 8px #050b12;
+}
+.dash::before { left:8% }
+.dash::after { right:8%; transform:skewX(14deg) }
+.seats {
+  position:absolute; inset:auto 0 5px; z-index:2;
+  display:flex; justify-content:center; gap:4px; padding:0 8px; pointer-events:none;
+}
+.seat { position:relative; display:grid; justify-items:center; align-content:end; min-width:0; width:57px }
+.seat .av {
+  width:min(100%,47px); aspect-ratio:1; border-radius:50%; overflow:hidden; border:1px solid #7498b3;
+  box-shadow:0 3px 7px #000b,0 0 0 2px #111b29;
+}
+.seat.me .av,.seat.ok .av { border-color:var(--mint) }
+.seat.err .av { border-color:#ff956e }
+.seat.fail .av { filter:grayscale(.6) brightness(.8) }
+.seat.helped .av { border-color:var(--cyan); box-shadow:0 0 0 2px #49e3e77a }
+.seat b {
+  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  margin-top:3px; font-weight:600; font-size:11px; line-height:1.3; text-shadow:0 1px 4px #000;
+}
+.popfx {
+  position:absolute; left:50%; top:-9px; transform:translateX(-50%);
+  padding:1px 4px; border-radius:3px; background:#101e31;
+  font-size:13px; font-weight:700; white-space:nowrap; animation:floatUp .9s forwards;
+}
+@keyframes floatUp { to { transform:translate(-50%,-12px); opacity:0 } }
+.helpme {
+  position:absolute; bottom:70%; left:50%; transform:translateX(-50%);
+  width:clamp(44px,100%,74px); min-height:44px; padding:3px;
+  border:1px solid #fff0c2; border-radius:6px; background:var(--warn); color:var(--navy);
+  cursor:pointer; pointer-events:auto; font-size:10px; line-height:1.08; font-weight:700;
+}
+.fire {
+  position:absolute; display:grid; place-items:center; width:44px; height:44px; padding:0;
+  border:0; border-radius:8px; background:transparent; color:#ffb483; cursor:pointer;
+  transform:translate(-50%,-50%); z-index:3;
+}
+.fire svg { position:absolute; width:40px; height:40px; bottom:5px; pointer-events:none; filter:drop-shadow(0 0 4px #ff802a72) }
+.gfires .fire { pointer-events:none }
+.gfires .fire svg { bottom:1px }
+.fire .flame { transform-origin:50% 91%; animation:fire-flicker .52s ease-in-out infinite alternate }
+.fire:nth-child(even) .flame { animation-delay:-.31s }
+.fire .fire-action {
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  padding:1px 3px; border:1px solid #ffc591a0; border-radius:3px; background:#24131b;
+  color:#ffddbb; font-size:9px; line-height:1.2; font-weight:700; white-space:nowrap;
+}
+.fire:active svg { opacity:.66; transform:scale(.87) }
+.fire.out { pointer-events:none; animation:fire-out .4s ease both }
+@keyframes fire-flicker { from { transform:scale(.91,.92); opacity:.87 } to { transform:scale(1.04,1.07) } }
+@keyframes fire-out { to { opacity:0; transform:translate(-50%,-65%) scale(.5) } }
+.cockpit .dmgfx {
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  box-shadow:inset 0 0 22px 7px #e4572ebd;
+  opacity:var(--dmg); transition:opacity .3s ease;
+}
+.alarm .cockpit { border-color:#ff9c76 }
+.ticker {
+  position:absolute; z-index:4; inset:6px 7px auto; pointer-events:none; padding:4px 7px;
+  border-left:2px solid var(--cyan); border-radius:3px; background:#0a1426ee;
+  font-size:12px; line-height:1.35; font-weight:600;
+}
+.ticker:empty { display:none }
+
+/* Orden y controles */
+.hudrow {
+  display:flex; justify-content:space-between; align-items:flex-end; gap:8px;
+  margin-top:6px; padding:5px 2px 0;
+}
+.stage-k {
+  margin:0; color:var(--cyan); font-size:11px; font-weight:700; letter-spacing:.075em; text-transform:uppercase;
+}
+.stage-n { margin:2px 0 0; color:var(--ink); font-weight:600; font-size:clamp(14px,4vw,20px); line-height:1.2 }
+.ships { flex:0 0 41%; margin:0; text-align:right }
+.ships strong { display:block; color:var(--mint); font-size:clamp(26px,7vw,34px); font-weight:700; line-height:.98; font-variant-numeric:tabular-nums }
+.ships strong.below { color:#ffd084 }
+.ships small { display:block; margin-top:4px; color:var(--soft); font-size:10px; line-height:1.25 }
+.meters {
+  display:grid; grid-template-columns:1fr 1fr auto auto; gap:7px; align-items:end;
+  padding:5px 2px 7px; border-bottom:1px solid #34465b;
+  color:var(--soft); font-size:11px; font-weight:600;
+}
+.meter { display:grid; gap:2px; min-width:0 }
+.mbar { height:7px; background:#2d4059; transform:skewX(-14deg); overflow:hidden }
+.mbar i { display:block; height:100%; transition:width .2s ease,background-color .2s ease }
+.hands,.errs { white-space:nowrap; color:var(--soft); font-size:11px; font-weight:600 }
+.errs.hot { color:#ffb290 }
+.order {
+  position:relative; min-height:75px; padding:6px 2px 10px; margin-top:4px;
+  border-top:1px solid #50647a;
+}
+.order.ok { border-top-color:var(--mint) }
+.order.fail { border-top-color:var(--bad) }
+.order p { margin:0; color:var(--soft); font-size:11px; font-weight:600; letter-spacing:.075em; text-transform:uppercase }
+.order .txt { margin-top:2px; color:var(--ink); font-size:clamp(18px,5.2vw,26px); font-weight:700; line-height:1.13; letter-spacing:-.025em; text-wrap:pretty }
+.order-verb { display:block; color:#9be8f2; font-size:.74em; font-weight:600; letter-spacing:0; margin-bottom:2px }
+.order-head { display:flex; align-items:center; justify-content:space-between; gap:8px }
+.timer-readout { color:#e4efff; font-size:13px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums }
+.timer-track {
+  position:absolute; inset:auto 2px 2px; height:3px; overflow:hidden;
+  transform:skewX(-14deg); background:#c7e1ff21;
+}
+.timer { height:100%; background:var(--mint) }
+.errmsg {
+  display:inline-block; margin-top:7px; padding:3px 6px; border:1px solid #ec9a7c;
+  border-radius:3px; background:#42232a; color:#ffddcd; font-size:12px; font-weight:700;
+}
+.mypanel { margin-top:9px }
+.mypanel h3 { margin:0 0 6px; color:var(--soft); font-size:12px; font-weight:500; text-align:left }
+.mypanel h3 b { color:var(--ink); font-weight:600 }
+#s-play .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; background:#101b29 }
+.grid.shake { animation:control-warning .35s ease-out }
+@keyframes control-warning { from { outline:2px solid #e4572e; outline-offset:2px } to { outline-color:transparent } }
+.ctl {
+  display:flex; flex-direction:column; align-items:stretch; gap:5px;
+  min-width:0; min-height:86px; padding:8px; cursor:pointer; user-select:none;
+  text-align:center; color:var(--ink); background:#182536;
+  border:0; border-top:2px solid #52677d; border-radius:0;
+}
+.ctl .lb {
+  display:grid; place-items:center; min-height:2.3em; padding-inline:2px;
+  color:var(--ink); font-size:13px; font-weight:600; line-height:1.16;
+  text-wrap:balance; overflow-wrap:anywhere;
+}
+#s-play #cockpit {
+  border-color:#485c73; border-radius:4px; box-shadow:none;
+}
+#s-play #cockpit::before { background:linear-gradient(#0a13254d,transparent 24%) }
+#s-play #cockpit::after { box-shadow:none }
+#s-play #cockpit .strut { display:none }
+#s-play #cockpit .dash { border-top:1px solid #394c62; background:#101b29; box-shadow:none }
+#s-play #cockpit .dash::before,#s-play #cockpit .dash::after { display:none }
+#s-play #seats .av { box-shadow:none }
+#s-play #ticker {
+  border-radius:0; border-left-color:#9be8f2; background:#101b29eb;
+}
+.ctl :is(.pad,.switch-bank,.seg) { margin-top:auto }
+.ctl.btn .pad {
+  display:grid; place-items:center; align-self:center;
+  width:min(85%,116px); min-height:26px; margin-bottom:3px;
+  border-radius:3px; border:1px solid #577087;
+  background:#273b50; box-shadow:0 3px #0b141f;
+  transition:transform .08s,background-color .08s,box-shadow .08s;
+}
+.ctl.btn .pad::before {
+  content:""; width:18px; height:2px; background:#9be8f2; transform:skewX(-14deg);
+}
+@media (hover:hover) {
+  .ctl:is(.btn,.tg):hover { background:#203147; border-top-color:#9be8f2 }
+}
+.ctl.btn:is(:active,.hit) .pad {
+  transform:translateY(2px); background:#36566a; box-shadow:0 1px #0b141f;
+}
+.ctl.btn:is(:active,.hit) .pad::before { background:var(--mint) }
+.ctl.tg .sw2 {
+  display:block; position:relative; flex:none; width:44px; height:23px;
+  border-radius:3px; border:1px solid #75879a; background:#101a28;
+}
+.ctl.tg .sw2::after {
+  content:""; position:absolute; top:3px; left:3px; width:16px; height:15px;
+  border-radius:2px; background:#aab8c8; transition:transform .12s ease;
+}
+.switch-bank { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 7px; min-height:29px }
+.switch-on,.switch-off { font-size:11px; font-weight:600; line-height:1.12; color:var(--soft) }
+.switch-on,.ctl.tg[aria-pressed="true"] .switch-off { display:none }
+.ctl.tg[aria-pressed="true"] .switch-on { display:inline; color:var(--mint) }
+.ctl.tg[aria-pressed="true"] .sw2 { border-color:#83dcb2 }
+.ctl.tg[aria-pressed="true"] .sw2::after { transform:translateX(20px); background:var(--mint) }
+.ctl.dial { cursor:default }
+.seg {
+  position:relative; display:grid; grid-template-columns:repeat(2,minmax(44px,1fr)); gap:3px;
+  width:min(100%,140px); margin-inline:auto;
+}
+.seg button {
+  position:relative; display:grid; place-items:center; min-width:44px; min-height:44px; padding:0;
+  cursor:pointer; background:#111c2a; color:var(--ink); border:1px solid #536b83;
+  border-radius:2px; font-size:14px; font-weight:700; font-variant-numeric:tabular-nums;
+}
+.seg button[aria-pressed="true"] {
+  color:#091727; border-color:#9be8f2; background:#9be8f2; box-shadow:inset 0 -3px #457a8b;
+}
+.seg button:active { transform:translateY(1px); filter:brightness(.88) }
+.seg button:focus-visible { z-index:2 }
+@media (min-width:450px) { .seg { width:100%; grid-template-columns:repeat(4,minmax(44px,1fr)) } }
+
+/* Transiciones, resultado y configuración */
+.over {
+  position:fixed; inset:0; z-index:5; display:grid; place-items:center;
+  padding:calc(14px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));
+  background:#050d1bed;
+}
+.over .panel {
+  position:relative; width:min(100%,530px); max-height:100%; overflow:auto; margin:0;
+  border-top:3px solid var(--cyan); animation:screen-in .24s ease-out both;
+}
+#o-between .panel { border-top-color:var(--mint); background:linear-gradient(135deg,#143644,#0c192a 67%) }
+#o-between .stage-k {
+  display:inline-block; margin-left:4px; padding:4px 9px; background:var(--mint); color:var(--navy);
+  transform:skewX(-14deg);
+}
+#o-between h2,#o-end h2 { margin:7px 0 10px }
+#bNext { margin:12px 0 0; border-left:3px solid var(--cyan); padding:6px 0 6px 10px }
+.big { margin:3px 0 7px; color:var(--mint); font-size:clamp(43px,11vw,66px); line-height:1; font-weight:700 }
+.big.bad { color:var(--warn) }
+.broken { font-size:36px; line-height:1; margin:0 }
+.bar {
+  position:relative; height:11px; margin:12px 3px 44px; border-radius:3px;
+  background:#33465d; box-shadow:inset 0 2px 4px #0006;
+}
+.bar .fill { position:absolute; inset:0 auto 0 0; border-radius:3px; background:linear-gradient(90deg,var(--cyan),var(--mint)) }
+.bar .mark { position:absolute; top:-3px; bottom:-4px; width:2px; background:#fff; box-shadow:0 0 0 1px #0a14249c }
+.bar .mark span {
+  position:absolute; top:19px; right:0; color:var(--soft); font-size:11px; white-space:nowrap;
+}
+#eGoal span { top:33px; right:-13px; color:#ffe0a6 }
+.losses { list-style:none; padding:0; margin:0; display:grid; gap:0 }
+.losses li {
+  display:flex; justify-content:space-between; gap:12px; padding:5px 0;
+  border-bottom:1px solid #3a506e; color:var(--soft); font-size:13px;
+}
+.losses li b { color:var(--ink); font-weight:700 }
+#o-config { z-index:6 }
+.cfg .stack,.opts2 { display:flex; flex-wrap:wrap; gap:7px }
+.cfg .stack { flex-direction:column; align-items:stretch; margin-top:9px }
+.cfg .note { margin-top:7px; font-size:12px }
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  .fire.out { opacity:0 }
+}
+
+/* Pantalla en vivo */
+body.livemode .wrap{width:100%;max-width:1700px;padding-inline:clamp(12px,1.6vw,28px)}
+#s-live{display:flex;flex-direction:column;gap:12px;min-width:0}
+.livehead{display:flex;align-items:center;justify-content:space-between;gap:10px 18px;flex-wrap:wrap}
+.livecopy{min-width:0}
+.livecopy .tag{margin:0 0 6px}
+.livecopy h1{margin:0;font-size:clamp(26px,3vw,43px);line-height:1.05}
+.livehead .liveactions{margin:0;gap:7px}
+.livehead .ghost{min-height:44px;padding:7px 12px;font-size:13px;border-radius:5px;white-space:normal}
+.livehead #fsBtn{border-color:#3375d9;background:#0c2f66}
+.demob{display:inline-block;margin:0 0 6px;padding:5px 10px;border-left:3px solid var(--warn);background:#231e21;color:#ffdb8a;font-size:13px;font-weight:600;line-height:1.3}
+.livecopy:has(.demob:not([hidden])) .tag{display:none}
+#liveMsg{margin:0;padding:14px 16px;border:1px solid #345377;background:#0b1930;color:var(--ink)}
+#liveMsg:empty{display:none}
+.rank{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:0}
+.rank li{min-width:0;padding:6px 10px;border:1px solid #294761;border-left:3px solid #37658b;background:#101d31;color:var(--soft);font-size:12px;line-height:1.3;overflow-wrap:anywhere}
+.rank li b{display:block;color:var(--ink);font-size:14px;font-weight:700}
+.rank li:first-child{border-left-color:var(--mint)}
+.rank li:first-child b{color:var(--mint)}
+.livebody{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.gridlive{display:grid;gap:12px;min-width:0;min-height:0}
+.gcard{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0;padding:10px;border:1px solid #395670;border-radius:8px;background:linear-gradient(155deg,#142840,#0e1a2c 44%,#142133);box-shadow:inset 0 1px #ffffff1a,0 5px 10px #0004}
+.gcard.alarm{border-color:var(--warn)}
+.gcard.stale .cockpit{opacity:.56}
+.gcard header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}
+.gcard header>div{min-width:0}
+.gname{margin:0;color:var(--ink);font-size:clamp(19px,1.75vw,29px);font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.gcode{display:block;margin-top:3px;color:var(--soft);font-size:12px;line-height:1.2}
+.badge{position:relative;isolation:isolate;max-width:47%;padding:5px 9px;color:#e5efff;font-size:12px;font-weight:700;line-height:1.2;text-align:center;overflow-wrap:anywhere}
+.badge::before{content:"";position:absolute;inset:0;z-index:-1;border:1px solid #567397;background:#223752;transform:skewX(-14deg)}
+.badge.play,.badge.ok{color:var(--navy)}
+.badge.play::before{border-color:var(--mint);background:var(--mint)}
+.badge.ok::before{border-color:var(--cyan);background:var(--cyan)}
+.badge.bad{color:#ffd5c2}
+.badge.bad::before{border-color:#d66448;background:#482225}
+.gcard .cockpit.mini{height:clamp(176px,37vw,270px);border-radius:5px;margin:0}
+.gcard .dash{height:28%}
+.gcard .seat{width:52px}
+.gcard .seat .av{width:min(39px,100%);height:auto;aspect-ratio:1}
+.gcard .seat b{font-size:11px}
+.gcard .ticker{font-size:12px;line-height:1.3}
+.gstats{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:11px;align-items:center;font-variant-numeric:tabular-nums}
+.gbig{align-self:stretch;display:grid;align-content:center;min-width:0;padding-right:9px;border-right:1px solid #34516b}
+.gbig .gcrew{color:var(--mint);font-size:clamp(35px,3.55vw,62px);font-weight:700;line-height:.95;letter-spacing:-.045em}
+.gbig .gcrew.below{color:#ffd486}
+.gmaximum{color:var(--soft);font-size:clamp(13px,1.5vw,23px);font-weight:600}
+.gmini{display:block;margin-top:3px;color:var(--ink);font-weight:600;font-size:13px;line-height:1.2}
+.gcut{display:block;margin-top:3px;color:var(--soft);font-size:11px;line-height:1.2}
+.gside{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:6px 10px;min-width:0;color:var(--ink);font-size:13px;line-height:1.2}
+.gstage{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:9px;row-gap:2px;min-width:0}
+.gst{color:var(--cyan);font-weight:700;white-space:nowrap}
+.gstname{min-width:0;font-size:clamp(13px,1.16vw,19px);font-weight:600;overflow-wrap:anywhere}
+.gside .mbar{height:6px;margin:3px 2px 0;background:#35485d}
+.gside .ghull{color:var(--ink);font-weight:700}
+.gorders{color:var(--soft);font-weight:600}
+.gmisc{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:3px 11px;line-height:1.2;color:var(--soft)}
+.gmisc b{color:var(--ink);font-weight:700}
+.feedwrap{min-width:0;min-height:0;padding:12px 13px;overflow:auto;border:1px solid #395670;border-radius:8px;background:#101d30;box-shadow:inset 0 1px #ffffff1a}
+.feedwrap:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.feedwrap h2{display:flex;align-items:center;gap:8px;margin:0 0 9px;color:var(--ink);font-size:clamp(18px,1.6vw,24px)}
+.feedwrap h2::before{content:"";width:5px;height:1em;background:var(--warn);transform:skewX(-14deg)}
+.feed{list-style:none;padding:0;margin:0}
+.feed li{padding:7px 0;border-top:1px solid #334961;color:var(--ink);font-size:clamp(13px,1.15vw,17px);line-height:1.35;overflow-wrap:anywhere}
+.feed li span{display:block;margin-bottom:2px;color:#bfd1e2;font-size:12px;font-variant-numeric:tabular-nums}
+.feed li:first-child span{color:var(--warn)}
+@media (max-width:900px){
+  .gridlive{grid-template-columns:minmax(0,1fr) !important;grid-template-rows:none !important}
+}
+@media (min-width:901px){
+  .livecopy{display:flex;align-items:center;gap:14px}
+  .livecopy .tag,.livecopy .demob{margin:0}
+  .rank{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .livebody:has(.feedwrap:not([hidden])){grid-template-columns:minmax(0,1fr) auto}
+  .feedwrap{width:clamp(190px,17.5vw,295px)}
+  .gcard{padding:9px 11px}
+  .gcode{display:none}
+  .gside{font-size:clamp(13px,1.075vw,17px)}
+}
+@media (min-width:901px) and (max-width:1099px) and (max-height:679px), (min-width:1100px) and (max-height:614px){
+  .gridlive{grid-template-rows:none !important}
+}
+@media (min-width:901px) and (min-height:680px), (min-width:1100px) and (min-height:615px){
+  body.livemode:not(:has(.gcard:nth-child(7))) .wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:none;padding-block:12px}
+  body.livemode:not(:has(.gcard:nth-child(7))) #s-live{flex:1;min-height:0;gap:9px}
+  body.livemode:not(:has(.gcard:nth-child(7))) .livebody{flex:1;min-height:0}
+  body.livemode:not(:has(.gcard:nth-child(7))) .gcard .cockpit.mini{flex:1;min-height:0;height:auto}
+}
+@media (min-width:1100px) and (max-height:679px){
+  .gcard .dash{height:33%}
+  .gcard .seat .av{width:min(34px,100%)}
+}
+/* Editorial orbital */
+body:has(#s-play:not([hidden])) #sky { opacity:.32 }
+body:has(#s-play:not([hidden])) #gear {
+  border-radius:4px; border-color:#52677d; background:#182536; box-shadow:none;
+}
+#s-play .flight-key, #s-play .rotate-tip { display:none }
+#s-play .flight-sr {
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip-path:inset(50%); white-space:nowrap;
+}
+/* FIX aviso vertical */
+@media (orientation:portrait) and (pointer:coarse) {
+  #s-play { position:relative }
+  #s-play .rotate-tip {
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+    position:absolute; z-index:2; inset:4px 6px auto; padding-left:9px;
+    border:1px solid #5f533d; border-left:3px solid var(--warn);
+    border-radius:5px; background:#271f21ed; pointer-events:none;
+  }
+  body:has(#s-play:not([hidden]) #rotateTip:not([hidden])) #gear {
+    width:44px; padding:0; font-size:0;
+  }
+  #s-play:has(#rotateTip) .rotate-tip {
+    inset:-52px 52px auto 0;
+  }
+  #s-play .rotate-tip p { margin:0; color:#ffe2a6; font-size:12px; font-weight:600 }
+  #dismissRotate {
+    flex:0 0 44px; min-height:44px; padding:0; border:0; background:transparent;
+    color:#ffe2a6; font-size:22px; cursor:pointer; pointer-events:auto;
+  }
+}
+@media (orientation:portrait) and (pointer:coarse) and (max-height:820px) {
+  body.ingame:has(#s-play:not([hidden])) { min-height:100dvh }
+  body.ingame:has(#s-play:not([hidden])) .wrap { padding-bottom:calc(8px + env(safe-area-inset-bottom)) }
+  #s-play #cockpit { height:clamp(142px,17.5dvh,148px) }
+  #s-play #fires .fire { top:23px !important }
+  #s-play #fires .fire:is([data-slot="6"],[data-slot="7"],[data-slot="8"],[data-slot="9"],[data-slot="10"],[data-slot="11"]) {
+    top:69px !important;
+  }
+  #s-play #seats .helpme { bottom:0 }
+  #s-play .mypanel { margin-top:7px }
+  #s-play #grid { gap:5px }
+  #s-play #grid .ctl { min-height:84px; padding:5px; gap:4px }
+  #s-play #grid .ctl.btn .pad { min-height:26px }
+}
+@media (orientation:portrait) and (pointer:coarse) and (min-height:821px) and (min-width:412px) and (max-width:449px) {
+  #s-play #grid .ctl { gap:4px }
+  #s-play #grid .ctl.dial { padding-inline:2px }
+  #s-play #grid .seg { width:100%; grid-template-columns:repeat(4,minmax(44px,1fr)); gap:2px }
+}
+/* === Horizontal === */
+@media (orientation:landscape) and (max-height:520px) and (pointer:coarse) {
+  body[data-flight-view="mobile"].ingame:has(#s-play:not([hidden])) {
+    min-height:100dvh;
+  }
+  body[data-flight-view="mobile"].ingame:has(#s-play:not([hidden])) .wrap {
+    width:100%; max-width:none; height:100vh; height:100dvh;
+    padding:max(6px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
+      max(6px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  }
+  body[data-flight-view="mobile"]:has(#s-play:not([hidden])) #gear {
+    top:max(6px,env(safe-area-inset-top)); right:max(10px,env(safe-area-inset-right));
+    width:44px; min-height:44px; padding:0; font-size:0;
+  }
+  body[data-flight-view="mobile"] #s-play {
+    display:grid; align-content:stretch; height:100%;
+    grid-template:
+      "hud   panel" auto
+      "stats panel" auto
+      "comms panel" auto
+      "view  panel" minmax(94px,1fr) / minmax(min(268px,43vw),2fr) minmax(0,3fr);
+    column-gap:13px;
+    animation:none;
+  }
+  body[data-flight-view="mobile"] #s-play .hudrow {
+    grid-area:hud; align-items:center; gap:6px; margin:0;
+    padding:4px 7px 0;
+  }
+  body[data-flight-view="mobile"] #s-play .stage-k { font-size:10px; line-height:1.15 }
+  body[data-flight-view="mobile"] #s-play .stage-n {
+    font-size:12px; line-height:1.12; text-wrap:balance;
+  }
+  body[data-flight-view="mobile"] #s-play .ships {
+    flex:0 0 42%; display:flex; justify-content:flex-end; align-items:center; gap:4px;
+  }
+  body[data-flight-view="mobile"] #s-play .ships strong { font-size:20px; line-height:1 }
+  body[data-flight-view="mobile"] #s-play .ships small { font-size:9px; margin-top:0 }
+  body[data-flight-view="mobile"] #s-play .meters {
+    grid-area:stats; gap:6px; font-size:10px; line-height:1.12;
+    margin-bottom:5px; padding:4px 7px 5px;
+  }
+  body[data-flight-view="mobile"] #s-play :is(.hands,.errs) { font-size:10px }
+  body[data-flight-view="mobile"] #s-play .meters .mbar { height:4px }
+  body[data-flight-view="mobile"] #s-play #cockpit {
+    grid-area:view; height:auto; min-height:0; min-width:0;
+  }
+  body[data-flight-view="mobile"] #s-play #cockpit .dash { height:29% }
+  body[data-flight-view="mobile"] #s-play #seats { bottom:3px }
+  body[data-flight-view="mobile"] #s-play #seats .av { width:min(36px,100%) }
+  body[data-flight-view="mobile"] #s-play #seats .seat b { margin-top:1px; font-size:10px }
+  body[data-flight-view="mobile"] #s-play #ticker { font-size:11px }
+  /* Distribuí los puntos de fuego en dos franjas de 44 px, aun con poca altura. */
+  body[data-flight-view="mobile"] #s-play #fires .fire { top:max(23px,25%) !important }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="6"],[data-slot="7"],[data-slot="8"],[data-slot="9"],[data-slot="10"],[data-slot="11"]) {
+    top:max(69px,calc(25% + 46px),55%) !important;
+  }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="0"],[data-slot="6"]) { left:8.25% !important }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="1"],[data-slot="7"]) { left:24.95% !important }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="2"],[data-slot="8"]) { left:41.65% !important }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="3"],[data-slot="9"]) { left:58.35% !important }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="4"],[data-slot="10"]) { left:75.05% !important }
+  body[data-flight-view="mobile"] #s-play #fires .fire:is([data-slot="5"],[data-slot="11"]) { left:91.75% !important }
+  body[data-flight-view="mobile"] #s-play .flight-comms {
+    grid-area:comms; display:grid; gap:4px; margin-bottom:4px; min-width:0;
+  }
+  body[data-flight-view="mobile"] #s-play #order {
+    min-height:64px; margin:0; padding:3px 7px 8px; border-top:0;
+  }
+  body[data-flight-view="mobile"] #s-play #orderTxt {
+    margin-top:2px; font-size:clamp(16px,2.48vw,23px); line-height:1.1;
+    overflow-wrap:anywhere;
+  }
+  body[data-flight-view="mobile"] #s-play .flight-notices {
+    display:flex; align-items:center; gap:5px; min-height:49px; min-width:0;
+  }
+  body[data-flight-view="mobile"] #s-play .flight-notices:not(:has(#errMsg:not([hidden]),.helpme:not([hidden]))) { display:none }
+  body[data-flight-view="mobile"] #s-play .flight-notices #errMsg {
+    display:grid; align-items:center; flex:0 1 46%; min-width:0; margin:0;
+    padding:4px 5px; font-size:11px; line-height:1.15;
+  }
+  body[data-flight-view="mobile"] #s-play #flightHelp {
+    flex:1; display:flex; align-items:center; gap:5px; min-width:0;
+    overflow:auto hidden; overscroll-behavior-x:contain; scrollbar-width:thin;
+  }
+  body[data-flight-view="mobile"] #s-play #flightHelp .helpme {
+    position:static; transform:none; flex:1 0 120px; width:auto; max-width:100%; padding:3px 6px;
+    font-size:11px; line-height:1.15; overflow-wrap:anywhere;
+  }
+  body[data-flight-view="mobile"] #s-play #flightHelp .helpme:focus-visible { outline-offset:-4px }
+  body[data-flight-view="mobile"] #s-play .mypanel {
+    grid-area:panel; display:flex; flex-direction:column; gap:5px; min-width:0; margin:0;
+  }
+  body[data-flight-view="mobile"] #s-play .mypanel h3 {
+    display:block; align-content:center;
+    min-height:44px; padding-inline:8px 48px; margin:0; border-bottom:1px solid var(--line);
+    font-size:13px; line-height:1.15;
+  }
+  body[data-flight-view="mobile"] #s-play #grid {
+    flex:1; display:grid; grid-template:repeat(2,minmax(min-content,1fr)) / repeat(3,minmax(0,1fr));
+    gap:4px; min-height:0;
+  }
+  body[data-flight-view="mobile"] #s-play .ctl {
+    min-width:0; min-height:44px; padding:7px; gap:4px;
+  }
+  body[data-flight-view="mobile"] #s-play .ctl .lb { font-size:13px; line-height:1.14 }
+  body[data-flight-view="mobile"] #s-play .ctl.btn .pad { min-height:30px }
+  body[data-flight-view="mobile"] #s-play .ctl.dial { padding:4px; gap:3px }
+  body[data-flight-view="mobile"] #s-play .seg {
+    grid-template-columns:repeat(2,minmax(44px,1fr)); width:min(100%,128px); gap:2px;
+  }
+}
+
+@media (orientation:landscape) and (max-height:355px) and (pointer:coarse) {
+  body[data-flight-view="mobile"] #s-play .hudrow { padding:2px 6px 0 }
+  body[data-flight-view="mobile"] #s-play .stage-k { font-size:9px }
+  body[data-flight-view="mobile"] #s-play .stage-n { margin-top:1px; font-size:11px; line-height:1.1 }
+  body[data-flight-view="mobile"] #s-play .meters {
+    margin-bottom:4px; padding:2px 6px 3px;
+  }
+  body[data-flight-view="mobile"] #s-play .flight-comms { margin-bottom:3px; gap:3px }
+  body[data-flight-view="mobile"] #s-play #order {
+    min-height:55px; padding:3px 7px 7px;
+  }
+  body[data-flight-view="mobile"] #s-play #orderTxt {
+    margin-top:2px; font-size:clamp(14px,2vw,17px); line-height:1.1;
+  }
+  body[data-flight-view="mobile"] #s-play .flight-notices { min-height:45px }
+  body[data-flight-view="mobile"] #s-play #flightHelp { scrollbar-width:none }
+}
+
+/* === Cabina compu === */
+body[data-flight-view="cabin"]:has(#s-play:not([hidden])) .wrap {
+  max-width:1600px;
+  padding:calc(8px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
+    calc(12px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+}
+body[data-flight-view="cabin"]:has(#s-play:not([hidden])) #gear { z-index:5 }
+body[data-flight-view="cabin"] #s-play {
+  display:grid; align-content:start; position:relative; isolation:isolate; gap:12px 24px;
+  grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr);
+  grid-template-rows:auto minmax(285px,57vh) auto;
+  grid-template-rows:auto minmax(285px,57dvh) auto;
+  grid-template-areas:"hud stats" "comms view" "panel panel";
+  min-height:0; animation:none;
+}
+body[data-flight-view="cabin"] #cockpit {
+  grid-area:view; height:auto; min-width:0; min-height:0;
+}
+body[data-flight-view="cabin"] #cockpit .dash { height:20% }
+
+/* Información del vuelo en una sola línea. */
+body[data-flight-view="cabin"] #s-play .hudrow,
+body[data-flight-view="cabin"] #s-play .meters {
+  margin:0; padding:4px 0 8px; align-items:center; border-bottom:1px solid #465c73;
+}
+body[data-flight-view="cabin"] #s-play .hudrow {
+  grid-area:hud;
+}
+body[data-flight-view="cabin"] #s-play .stage-n {
+  font-size:clamp(14px,1.15vw,19px); line-height:1.2;
+}
+body[data-flight-view="cabin"] #s-play .ships { display:flex; align-items:center; text-align:left; gap:8px }
+body[data-flight-view="cabin"] #s-play .ships strong { font-size:clamp(23px,2.2vw,34px) }
+body[data-flight-view="cabin"] #s-play .ships small { margin:0; font-size:11px }
+body[data-flight-view="cabin"] #s-play .meters {
+  grid-area:stats; grid-template-columns:repeat(2,minmax(0,1fr)) auto auto; gap:12px;
+  padding-right:155px;
+}
+body[data-flight-view="cabin"] #s-play .meter > span { font-size:11px; line-height:1.2 }
+body[data-flight-view="cabin"] #s-play #errs { text-align:right }
+
+body[data-flight-view="cabin"] #s-play .flight-comms {
+  grid-area:comms; display:grid; min-width:0; min-height:0;
+  align-content:center; gap:12px;
+}
+body[data-flight-view="cabin"] #order {
+  margin:0; padding:10px 0 18px; min-height:0;
+}
+body[data-flight-view="cabin"] #orderTxt {
+  margin-top:12px; font-size:clamp(26px,3.08vw,48px); line-height:1.04;
+}
+body[data-flight-view="cabin"] #order .timer-track {
+  inset:auto 0 0; height:4px;
+}
+body[data-flight-view="cabin"] #s-play .flight-notices {
+  display:grid; gap:5px; min-width:0; align-content:start;
+}
+body[data-flight-view="cabin"] #errMsg { margin:0; max-width:100%; justify-self:start }
+body[data-flight-view="cabin"] #flightHelp {
+  display:flex; gap:5px; max-width:100%; overflow-x:auto; padding:3px;
+}
+body[data-flight-view="cabin"] #flightHelp:not(:has(.helpme:not([hidden]))) { display:none }
+body[data-flight-view="cabin"] #flightHelp .helpme {
+  position:static; flex:none; width:auto; max-width:185px; min-width:44px; padding:4px 9px;
+  transform:none; font-size:12px; line-height:1.25;
+}
+body[data-flight-view="cabin"] #flightHelp .helpme:focus-visible { outline-offset:-3px }
+body[data-flight-view="cabin"] #ticker {
+  left:7px; right:7px;
+}
+
+/* Tripulantes y fuegos en el visor. */
+body[data-flight-view="cabin"] #seats { bottom:8px; gap:5px; padding-inline:12px }
+body[data-flight-view="cabin"] #seats .seat {
+  flex:0 1 clamp(35px,4.4vw,68px);
+}
+body[data-flight-view="cabin"] #seats .seat .av {
+  width:min(100%,51px); background:#182638;
+}
+body[data-flight-view="cabin"] #seats .seat .av svg { filter:brightness(.82) saturate(.8) }
+body[data-flight-view="cabin"] #seats .seat:is(.me,.ok,.err,.helped) .av svg { filter:none }
+body[data-flight-view="cabin"] #seats .seat b { font-size:clamp(10px,1vw,12px); text-align:center }
+body[data-flight-view="cabin"] #fires .fire {
+  left:var(--edge-x) !important; top:var(--edge-y) !important;
+}
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="0"],[data-slot="1"],[data-slot="2"]) { --edge-x:clamp(26px,4.2%,56px) }
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="6"],[data-slot="7"],[data-slot="8"]) { --edge-x:calc(clamp(26px,4.2%,56px) + 48px) }
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="3"],[data-slot="4"],[data-slot="5"]) { --edge-x:calc(100% - clamp(26px,4.2%,56px)) }
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="9"],[data-slot="10"],[data-slot="11"]) { --edge-x:calc(100% - clamp(26px,4.2%,56px) - 48px) }
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="0"],[data-slot="3"],[data-slot="6"],[data-slot="9"]) { --edge-y:42% }
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="1"],[data-slot="4"],[data-slot="7"],[data-slot="10"]) { --edge-y:calc(42% + 48px) }
+body[data-flight-view="cabin"] #fires .fire:is([data-slot="2"],[data-slot="5"],[data-slot="8"],[data-slot="11"]) { --edge-y:calc(42% + 96px) }
+
+body[data-flight-view="cabin"] #s-play .mypanel {
+  grid-area:panel; margin:0; min-width:0;
+}
+body[data-flight-view="cabin"] #s-play .mypanel h3 { margin:0 0 8px; font-size:14px }
+body[data-flight-view="cabin"] #grid {
+  grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr);
+  gap:5px;
+}
+body[data-flight-view="cabin"] #grid .ctl {
+  gap:4px; min-height:clamp(108px,16vh,164px); padding:8px;
+}
+body[data-flight-view="cabin"] #grid .ctl .lb { font-size:clamp(12px,1.04vw,16px) }
+body[data-flight-view="cabin"] #grid .flight-key {
+  display:inline-flex; align-self:flex-end; align-items:center; min-width:24px; min-height:22px;
+  justify-content:center; gap:5px; padding:2px 5px; border:1px solid #7995b4;
+  border-radius:2px; background:#182536; color:#f1f8ff; font:600 12px/1 Poppins,sans-serif;
+}
+body[data-flight-view="cabin"] #grid .flight-dial-keys { color:var(--cyan); white-space:nowrap }
+body[data-flight-view="cabin"] #grid .seg { width:min(100%,140px); grid-template-columns:repeat(2,minmax(44px,1fr)) }
+@media (min-width:1280px) {
+  body[data-flight-view="cabin"] #grid .seg { width:100%; grid-template-columns:repeat(4,minmax(44px,1fr)) }
+}
+/* FIX alto compu */
+@media (min-height:600px) {
+  body[data-flight-view="cabin"]:has(#s-play:not([hidden])) { min-height:100dvh }
+  body[data-flight-view="cabin"]:has(#s-play:not([hidden])) .wrap { height:100vh; height:100dvh }
+  body[data-flight-view="cabin"] #s-play {
+    height:100%; grid-template-rows:auto minmax(0,1fr) auto; padding-bottom:12px;
+  }
+}
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<button class="gear" id="gear" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Configuración</button>
+<main class="wrap">
+
+  <!-- Perfil -->
+  <section id="s-profile" hidden>
+    <div class="tag"><span>Tu tripulante</span></div>
+    <h1 id="profTitle">Armá tu tripulante</h1>
+    <p>Así te van a ver tus compañeros en la cabina de la nave.</p>
+    <div class="panel">
+      <label class="f">Tu nombre<input class="t" id="pname" maxlength="18" autocomplete="off"></label>
+      <div class="studio">
+        <div class="stagecol">
+          <div class="preview" id="preview" aria-hidden="true"></div>
+          <p class="pts" id="ptsLbl"></p>
+          <button class="ghost sm" id="randomize" type="button">Al azar</button>
+        </div>
+        <div class="box">
+          <div class="tabs" id="tabs" role="tablist" aria-label="Categorías"></div>
+          <div class="tabpanel" id="tabpanel" role="tabpanel"></div>
+          <div class="buybar" id="buybar" hidden></div>
+        </div>
+      </div>
+      <p class="profile-area-label">Tu área</p>
+      <div class="areas" id="areaPick"></div>
+      <p class="err" id="profErr" role="alert"></p>
+      <div class="row"><button class="cta" id="saveProfile" type="button">Guardar tripulante</button><button class="ghost" id="cancelProfile" type="button" hidden>Cancelar</button></div>
+    </div>
+  </section>
+
+  <!-- Inicio -->
+  <section id="s-lobby" hidden>
+    <header class="lobby-hero">
+      <svg class="lobby-orbit" viewBox="0 0 400 260" fill="none" aria-hidden="true">
+        <defs>
+          <radialGradient id="orbit-world" cx=".29" cy=".21" r=".83"><stop stop-color="#487d9f"/><stop offset=".32" stop-color="#24527a"/><stop offset=".74" stop-color="#102743"/><stop offset="1" stop-color="#0b1528"/></radialGradient>
+          <linearGradient id="orbit-edge" x2=".76" y2="1"><stop stop-color="#85deff"/><stop offset=".76" stop-color="#203650" stop-opacity=".4"/></linearGradient>
+          <linearGradient id="orbit-path"><stop stop-color="#49E3E7" stop-opacity=".1"/><stop offset=".55" stop-color="#71cfea" stop-opacity=".7"/><stop offset="1" stop-color="#49E3E7" stop-opacity=".16"/></linearGradient>
+          <clipPath id="orbit-mask"><circle cx="247" cy="118" r="89"/></clipPath>
+        </defs>
+        <circle cx="247" cy="118" r="108" stroke="#739fbe" stroke-opacity=".26" stroke-dasharray="2 5"/>
+        <circle cx="247" cy="118" r="91" stroke="#4aa3dc" stroke-opacity=".24" stroke-width="4"/>
+        <circle cx="247" cy="118" r="89" fill="url(#orbit-world)" stroke="url(#orbit-edge)" stroke-width="1.5"/>
+        <g clip-path="url(#orbit-mask)" stroke="#77a9cb" stroke-opacity=".31">
+          <path d="M145 94c63-26 112 4 193-45M149 106c71-34 127 4 191-50M146 120c84-37 119 7 199-43M149 132c75-35 112 14 200-43M155 143c65-31 111 6 186-39M163 160c58-36 112 4 175-42M174 167c61-29 100-7 159-39M181 182c45-26 102-10 143-39" stroke-width="2"/>
+          <path d="M147 114c86-31 140 1 194-44m-182 80c67-31 109 3 183-36m-171 59c48-32 112 1 165-41" stroke-width="7" stroke-opacity=".15"/>
+        </g>
+        <ellipse cx="244" cy="125" rx="143" ry="36" transform="rotate(-22 244 125)" stroke="url(#orbit-path)"/>
+        <path d="M110 159c9 24 77 20 152-10 64-26 119-66 113-89" stroke="url(#orbit-path)" stroke-width="2"/>
+        <g fill="#e6fbff"><circle cx="120" cy="65" r="1.4"/><circle cx="332" cy="42" r="1"/><circle cx="370" cy="173" r="1.6"/><circle cx="308" cy="206" r="1.5"/><circle cx="103" cy="115" r="1.5"/><circle cx="161" cy="56" r="1"/><circle cx="104" cy="182" r="1"/></g>
+        <g transform="translate(339 99) rotate(-25)">
+          <path d="M-22 0H-7m-11 3h9" stroke="#49E3E7" stroke-opacity=".54"/>
+          <path d="m-10-4 11 2 8 2-8 3-11 2 2-5z" fill="#b7d7ef" stroke="#effaff" stroke-width=".65"/>
+          <path d="m-6 0 8-1 2 1-7 1z" fill="#315777"/>
+        </g>
+      </svg>
+      <div class="tag"><span>Odisea 1A 2027</span></div>
+      <h1>Equipo espacial</h1>
+    </header>
+    <p class="lobby-intro">La flota de la cohorte 1A 2027 viaja desde el inicio hasta el cierre del bimestre, guiada por la nave de Academia. Cada persona maneja el panel de su área desde su celular, pero las órdenes le llegan a cualquiera. Para cumplirlas hay que saber qué área se ocupa de qué, pedírselo a quien corresponda y darse una mano.</p>
+    <div class="panel">
+      <div class="me"><div class="av" id="meAv" aria-hidden="true"></div><div><strong id="meName"></strong><small id="meArea"></small><small class="mepts" id="mePts"></small></div><button class="ghost sm" id="editProfile" type="button">Editar</button></div>
+      <div class="row lobby-actions"><button class="cta" id="create" type="button">Crear partida</button><button class="ghost" id="practice" type="button">Practicar solo</button><button class="ghost" id="liveBtn" type="button">Pantalla en vivo</button></div>
+      <div class="or">o sumate a una partida</div>
+      <div class="join"><input class="t code" id="codeIn" maxlength="4" placeholder="CÓDIGO" autocomplete="off" aria-label="Código de la partida"><button class="ghost" id="joinBtn" type="button">Unirme</button></div>
+      <p class="err" id="lobbyErr" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- Sala de espera -->
+  <section id="s-wait" hidden>
+    <header class="wait-head">
+      <div class="tag"><span>Sala de espera</span></div>
+      <p>Código de la partida</p>
+      <p class="bigcode" id="waitCode">----</p>
+    </header>
+    <div class="panel">
+      <div class="counter"><strong id="countN">1</strong><span id="countTxt">tripulante a bordo</span></div>
+      <label class="f" id="gnWrap" hidden>Nombre de la nave (así aparece en la pantalla en vivo)<input class="t" id="groupName" maxlength="24" autocomplete="off"></label>
+      <p id="gnShow" style="color:#fff;font-weight:600" hidden></p>
+      <div class="slots" id="slots"></div>
+      <div class="row"><button class="cta" id="launch" type="button" hidden>Despegar</button><span id="waitMsg" style="color:var(--soft);font-size:14px"></span></div>
+    </div>
+  </section>
+
+  <!-- Pantalla en vivo -->
+  <section id="s-live" aria-label="Pantalla en vivo" hidden>
+    <div class="livehead">
+      <div class="livecopy"><div class="tag"><span>En vivo</span></div><p class="demob" id="demoBanner" hidden>Demo · Grupos simulados</p><h1>Odisea 1A 2027</h1></div>
+      <div class="row liveactions">
+        <button class="ghost" id="feedToggle" type="button" aria-controls="liveFeedWrap">Ocultar alertas</button>
+        <button class="ghost" id="fsBtn" type="button">Pantalla completa</button>
+        <button class="ghost" id="liveDemo" type="button">Ver demo</button>
+        <button class="ghost" id="liveBack" type="button">Volver</button>
+      </div>
+    </div>
+    <ol class="rank" id="liveRank" aria-label="Posiciones por grupo" hidden></ol>
+    <p id="liveMsg" role="status"></p>
+    <div class="livebody">
+      <div class="gridlive" id="liveGrid"></div>
+      <aside class="feedwrap" id="liveFeedWrap" aria-label="Alertas" tabindex="0" hidden><h2>Alertas</h2><ol class="feed" id="liveFeed"></ol></aside>
+    </div>
+  </section>
+
+  <!-- Juego -->
+  <section id="s-play" hidden>
+    <div class="rotate-tip" id="rotateTip">
+      <p>Girá el celular para jugar más cómodo</p>
+      <button id="dismissRotate" type="button" aria-label="Cerrar aviso de rotación">×</button>
+    </div>
+    <div class="hudrow">
+      <div><p class="stage-k" id="stageK">Etapa 1 de 8</p><p class="stage-n" id="stageN"></p></div>
+      <p class="ships"><strong id="shipsN">40</strong><small id="shipsMeta"></small></p>
+    </div>
+    <div class="meters">
+      <div class="meter"><span id="progTxt">Órdenes</span><div class="mbar"><i id="progFill" style="width:0;background:var(--mint)"></i></div></div>
+      <div class="meter"><span id="hullTxt">Casco 100%</span><div class="mbar"><i id="hullFill" style="width:100%;background:var(--cyan)"></i></div></div>
+      <div class="hands" id="hands" title="Manos disponibles para ayudar"></div>
+      <div class="errs" id="errs"></div>
+    </div>
+    <div class="flight-comms">
+      <div class="order" id="order">
+        <div class="order-head"><p>Tu orden</p><span class="timer-readout" id="timerTxt"></span></div>
+        <div class="txt" id="orderTxt" aria-live="polite">Esperando…</div>
+        <div class="errmsg" id="errMsg" role="alert" hidden></div>
+        <div class="timer-track" aria-hidden="true"><div class="timer" id="timer"></div></div>
+      </div>
+      <div class="flight-notices">
+        <div id="flightHelp" role="group" aria-label="Ayuda a la tripulación"></div>
+        <span class="flight-sr" id="flightHelpStatus" role="status"></span>
+      </div>
+    </div>
+    <div class="cockpit" id="cockpit">
+      <canvas id="warp" aria-hidden="true"></canvas>
+      <div class="strut l"></div><div class="strut r"></div>
+      <div id="fires"></div>
+      <div class="dash"></div>
+      <div class="seats" id="seats"></div>
+      <div class="dmgfx"></div>
+      <div class="ticker" id="ticker" aria-live="polite"></div>
+    </div>
+    <div class="mypanel"><h3>Tu panel · <b id="myArea"></b></h3><div class="grid" id="grid"></div></div>
+  </section>
+</main>
+
+<div class="over" id="o-between" hidden>
+  <div class="panel">
+    <p class="stage-k" id="bK"></p>
+    <h2 id="bTitle"></h2>
+    <p id="bText"></p>
+    <p id="bNext" style="color:#fff;font-weight:600"></p>
+  </div>
+</div>
+
+<div class="over" id="o-end" hidden>
+  <div class="panel">
+    <p class="broken" id="eBroken" hidden aria-hidden="true">💥</p>
+    <h2 id="eTitle"></h2>
+    <p class="big" id="ePct"></p>
+    <p id="eSub"></p>
+    <div class="bar" aria-hidden="true"><div class="fill" id="eFill"></div><div class="mark" id="eBase"><span>Hoy</span></div><div class="mark" id="eGoal"><span>Aprueba</span></div><div class="mark" id="eMeta"><span>Meta</span></div></div>
+    <p id="eTeam" style="color:#fff"></p>
+    <p class="ptsline" id="ePts"></p>
+    <h3>Naves que se alejaron en cada etapa</h3>
+    <ul class="losses" id="eLosses"></ul>
+    <div class="row"><button class="cta" id="again" type="button" hidden>Jugar otra vez</button><button class="ghost" id="toWait" type="button" hidden>Volver a la sala</button><span id="eWait" style="color:var(--soft);font-size:14px"></span></div>
+  </div>
+</div>
+
+<div class="over" id="o-config" role="dialog" aria-labelledby="cfgT" hidden>
+  <div class="panel cfg">
+    <h2 id="cfgT">Configuración</h2>
+    <div class="stack" id="cfgNav"></div>
+    <div id="cfgSet"></div>
+    <div class="row"><button class="cta" id="cfgClose" type="button">Cerrar</button></div>
+  </div>
+</div>
+
+<script>
+const CONFIG = {
+  naves: 40,
+  permanenciaBase: 70,
+  mejoraObjetivo: 10,
+  // Cada control: [tipo, nombre, etapas en las que aparece]. Tipo: 'b' botón, 't' interruptor, 'd' dial 0 a 3.
+  // Si no se indican etapas, el control está en todas.
+  areas: [
+    { id: 'tut', nombre: 'Tutores', hace: 'Acompañamiento académico en la cursada y los finales',
+      controles: [['b', 'Invitación a clase', [1, 2, 3, 4, 5, 6]], ['t', 'Clase de consulta'], ['d', 'Nivel de seguimiento'], ['b', 'Recordatorio de API', [2, 3, 4, 5, 6]], ['b', 'Anuncio motivacional'], ['b', 'Repaso para finales', [6, 7, 8]]] },
+    { id: 'coa', nombre: 'Coaches', hace: 'Motivación, onboarding y hábitos de estudio',
+      controles: [['b', 'Llamada motivacional'], ['t', 'Onboarding', [1, 2, 3]], ['t', 'Campaña de WhatsApp'], ['b', 'Plan de estudio', [1, 2, 3, 4, 5]], ['t', 'Alerta de seguro de adaptación', [2, 3, 4, 5, 6]], ['b', 'Festejo de logros', [3, 4, 5, 6, 7, 8]]] },
+    { id: 'azu', nombre: 'Azu', hace: 'La plataforma Canvas',
+      controles: [['b', 'Cargar materias en Canvas', [1, 8]], ['t', 'Módulos publicados', [1, 2, 3, 4, 5, 6]], ['b', 'Cambio de agendas'], ['b', 'Restaurar contraseña'], ['t', 'Bancos de preguntas sincronizados', [2, 3, 4, 5, 6, 7]], ['b', 'Cerrar ticket']] },
+    { id: 'sec', nombre: 'Secretaría', hace: 'Validaciones, trámites de título y otros servicios',
+      controles: [['b', 'Validar DNI', [1, 2, 3, 4]], ['b', 'Validar título secundario', [1, 2, 3, 4, 5]], ['b', 'Validar Talento Tech', [1, 2, 3, 4, 5]], ['b', 'Trámite de título intermedio', [4, 5, 6, 7, 8]], ['b', 'Trámite de título', [5, 6, 7, 8]], ['b', 'Otros servicios']] },
+    { id: 'ef', nombre: 'Exámenes finales', hace: 'Proctoring de los exámenes',
+      controles: [['b', 'Activar proctoring'], ['b', 'Problema con cámara web'], ['d', 'Turno de mesa'], ['b', 'Validar identidad'], ['t', 'Habilitar mesas', [5, 6, 7, 8]], ['b', 'Campaña para inscripciones a final', [5, 6, 7, 8]]] },
+    { id: 'ri', nombre: 'RI', hace: 'Reinscripción y pagos',
+      controles: [['t', 'Reinscripciones activas', [1, 7, 8]], ['t', 'Suscripción'], ['d', 'Fase de descuento', [5, 6, 7, 8]], ['b', 'Métodos de pago'], ['b', 'Pedido de excepción']] },
+    { id: 'pp', nombre: 'PP', hace: 'Prácticas profesionalizantes, en paralelo al bimestre',
+      controles: [['b', 'Convenios', [1, 2, 3, 4]], ['d', 'Selección de modalidad', [1, 2, 3]], ['b', 'Validar firmas'], ['t', 'Activar PEL'], ['b', 'Validar informes finales', [5, 6, 7, 8]]] },
+    { id: 'tra', nombre: 'Training', hace: 'Capacitación y acompañamiento de los expertos',
+      controles: [['b', 'Capacitar expertos', [1, 2, 3, 4]], ['t', 'Revisión de grabaciones'], ['d', 'Nivel de acompañamiento'], ['b', 'Contacto con expertos'], ['t', 'Aula virtual', [1, 2, 3, 4, 5]], ['b', 'Revisión de votaciones', [5, 6, 7, 8]]] }
+  ],
+  etapas: [ // foco: áreas cuyas órdenes aparecen más en esa etapa
+    { nombre: 'Despegue', texto: 'Arranca el bimestre: primer ingreso al campus, materias nuevas, convenios y firmas de prácticas, y muchas dudas.', foco: ['azu', 'tut', 'coa', 'pp'] },
+    { nombre: 'Cinturón de las autoevaluaciones', texto: 'Las primeras autoevaluaciones, de las materias y de las prácticas, ponen a prueba el rumbo.', foco: ['tut', 'coa', 'azu', 'pp'] },
+    { nombre: 'Agujero negro de las API', texto: 'Las entregas de API tienen fecha y una gravedad enorme: se tragan a los que vienen atrasados.', foco: ['tut', 'coa', 'azu'] },
+    { nombre: 'Tormenta de trámites', texto: 'Validaciones, documentación y trámites de título se acumulan en la ruta.', foco: ['sec', 'coa', 'tut'] },
+    { nombre: 'Campo de asteroides', texto: 'Trabajo, familia, cansancio y temas económicos chocan contra la cursada.', foco: ['coa', 'ri', 'tut'] },
+    { nombre: 'Nebulosa de los informes', texto: 'Las prácticas profesionalizantes, que corren a la par del bimestre, piden la entrega de informes.', foco: ['pp', 'tut'] },
+    { nombre: 'Órbita de los finales', texto: 'Mesas de examen con proctoring a la vista.', foco: ['ef', 'tut'] },
+    { nombre: 'Estación de reinscripción', texto: 'Cierre del bimestre: para seguir viaje hay que reinscribirse y tener los pagos al día.', foco: ['ri', 'sec'] }
+  ]
+};
+
+const JUEGO = {
+  casco: 100,          // vida de la nave de Academia
+  danoFalla: 8,        // una orden que vence
+  danoError: 2,        // tocar un control que nadie pidió
+  danoFuego: 1,        // cada fuego encendido, cada 2 segundos
+  maxFuegos: 6,
+  manosPorEtapa: 3,    // ayudas que el equipo puede dar por etapa
+  segundosAyuda: 6,    // tiempo extra que suma una mano
+  erroresPorNave: 3,   // cada tantos errores acumulados se aleja una nave
+  tiempoBase: 10,      // segundos para la primera orden
+  tiempoMin: 5,        // nunca menos que esto
+  tiempoBaja: .6,      // cuánto se acorta por etapa
+  graciaRed: .8,       // segundos extra que el juego espera antes de dar por vencida una orden (por demoras de conexión)
+  silencioMax: 6       // segundos sin noticias de quien lleva la partida antes de que otra persona tome el mando
+};
+let SET = { reparto: 'compartir', tiempo: 0 }; // ajustes de la partida (los maneja quien la crea)
+const APROB_PCT = CONFIG.permanenciaBase + CONFIG.mejoraObjetivo;
+const APROB = Math.ceil(CONFIG.naves * APROB_PCT / 100);   // con esto se aprueba
+const META = CONFIG.naves;                                  // la meta: que lleguen todas
+const ESCENAS = ['station', 'belt', 'hole', 'storm', 'rocks', 'nebula', 'ringed', 'gate'];
+const AREA = Object.fromEntries(CONFIG.areas.map(a => [a.id, a]));
+const CTL = {};
+CONFIG.areas.forEach(a => a.controles.forEach((c, i) => { CTL[a.id + i] = { id: a.id + i, area: a.id, kind: c[0], label: c[1], etapas: c[2] || null }; }));
+const activeIn = (c, stage) => !c.etapas || c.etapas.includes(stage + 1);
+const $ = id => document.getElementById(id);
+
+/* ===== Tripulantes: avatares ===== */
+const PALETA = ['#0056F3', '#49E3E7', '#79FFBA', '#062149', '#F2B33D', '#E4572E', '#FF7FB0', '#8E6CF0', '#FFFFFF', '#1E1A18'];
+const PALETA_N = ['Azul Teclab', 'Cian', 'Menta', 'Azul marino', 'Amarillo', 'Naranja', 'Rosa', 'Violeta', 'Blanco', 'Negro'];
+const AV = {
+  pelo: ['Corto', 'Flequillo', 'Largo', 'Rulos', 'Rodete', 'Rapado', 'Afro', 'Coleta', 'Melena', 'Cresta'],
+  colorPelo: ['#1E1A18', '#5A3A22', '#A0662E', '#E4C27A', '#B5482E', '#9AA3AE', '#49E3E7', '#FF7FB0', '#8E6CF0'],
+  piel: ['#F5D7C0', '#E8B896', '#C98E66', '#A0673F', '#6E4529'],
+  cara: ['Sonrisa', 'Risa', 'Tranqui', 'Guiño', 'Sorpresa', 'Pícara', 'Concentrada'],
+  detalle: ['Nada', 'Pecas', 'Bigote', 'Barba', 'Barba corta', 'Lunar', 'Curita'],
+  ropa: ['Remera', 'Buzo', 'Camisa', 'Remera Teclab', 'Campera', 'Traje espacial'],
+  colorRopa: PALETA,
+  gorro: ['Sin gorro', 'Vincha', 'Gorra', 'Gorro de lana', 'Boina', 'Galera', 'Casco espacial', 'Corona'],
+  colorGorro: PALETA,
+  acc: ['Nada', 'Aros', 'Auriculares', 'Moño', 'Bufanda', 'Medalla Teclab', 'Antenas', 'Estrella de comando'],
+  colorAcc: PALETA,
+  lentes: ['Sin lentes', 'Redondos', 'Rectangulares', 'Grandes', 'Ojo de gato', 'Media montura', 'Aviador', 'Hexagonales', 'De lectura', 'De sol', 'Visor espacial'],
+  colorLentes: ['#1E1A18', '#7A4A2A', '#9AA3AE', '#D4A94A', '#0056F3', '#E4572E', '#FF7FB0', '#79FFBA', '#8E6CF0', '#FFFFFF']
+};
+const AV_NAMES = {
+  colorPelo: ['Negro', 'Castaño', 'Castaño claro', 'Rubio', 'Colorado', 'Canoso', 'Cian', 'Rosa', 'Violeta'],
+  piel: ['Muy clara', 'Clara', 'Media', 'Morena', 'Oscura'],
+  colorRopa: PALETA_N, colorGorro: PALETA_N, colorAcc: PALETA_N,
+  colorLentes: ['Negro', 'Carey', 'Plateado', 'Dorado', 'Azul', 'Naranja', 'Rosa', 'Menta', 'Violeta', 'Blanco']
+};
+// Lo que se desbloquea con puntos (0 = gratis)
+const PRECIOS = {
+  ropa: [0, 0, 0, 0, 0, 80],
+  gorro: [0, 0, 50, 50, 80, 120, 150, 300],
+  acc: [0, 30, 50, 40, 60, 100, 150, 200],
+  lentes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60]
+};
+const PUNTOS = { meta: 100, aprobado: 50, participar: 10, nave_rota: 5 };
+const TABS = [['pelo', 'Pelo'], ['cara', 'Cara'], ['piel', 'Piel'], ['ropa', 'Ropa'], ['gorro', 'Gorros'], ['lentes', 'Lentes'], ['acc', 'Accesorios']];
+
+function cleanAvatar(a){
+  if (a && a.lentes === undefined && Number.isInteger(a.cara)){
+    // perfiles viejos: "Con lentes" era una expresión; ahora es un accesorio
+    a = { ...a };
+    if (a.cara === 5){ a.cara = 0; a.lentes = 1; } else if (a.cara > 5) a.cara -= 1;
+  }
+  const o = {};
+  for (const k of Object.keys(AV)){ const v = Number(a && a[k]); o[k] = Number.isInteger(v) && v >= 0 && v < AV[k].length ? v : 0; }
+  return o;
+}
+function randomAvatar(){
+  const o = {};
+  for (const k of Object.keys(AV)) o[k] = Math.floor(Math.random() * AV[k].length);
+  for (const k of Object.keys(PRECIOS)) if ((PRECIOS[k][o[k]] || 0) > 0) o[k] = 0; // al azar solo elige cosas gratis
+  o.detalle = Math.random() < .6 ? 0 : o.detalle;
+  return o;
+}
+function shade(hex, f){
+  const n = parseInt(hex.slice(1), 16), t = f < 0 ? 0 : 255, p = Math.abs(f);
+  const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round((t - v) * p + v));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+let avatarPaintId = 0;
+
+function avatarSVG(raw, vb){
+  const a = cleanAvatar(raw);
+  const skin = AV.piel[a.piel], hair = AV.colorPelo[a.colorPelo];
+  const cloth = PALETA[a.colorRopa], hat = PALETA[a.colorGorro], acc = PALETA[a.colorAcc];
+  const skinLight = shade(skin, .38), skinDark = shade(skin, -.36);
+  const hairLight = shade(hair, .42), hairDark = shade(hair, -.48);
+  const stroke = (d, col, width = 1, opacity = 1) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"/>`;
+  const path = (d, fill, opacity = 1) => `<path d="${d}" fill="${fill}" opacity="${opacity}"/>`;
+  const dot = (x, y, r, fill) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"/>`;
+  const prefix = `portrait-paint-${++avatarPaintId}`;
+  const paint = name => `url(#${prefix}-${name})`;
+  const gradient = (name, stops) => `<linearGradient id="${prefix}-${name}" x1="18%" y1="0%" x2="75%" y2="100%">${stops.map(([at, col]) => `<stop offset="${at}" stop-color="${col}"/>`).join('')}</linearGradient>`;
+  const material = color => [['0%', shade(color, .4)], ['32%', color], ['100%', shade(color, -.61)]];
+
+  let o = `<defs>${gradient('skin', [['0%', skinLight], ['54%', skin], ['100%', skinDark]])}
+    ${gradient('hair', [['0%', hairLight], ['34%', hair], ['100%', hairDark]])}
+    ${gradient('cloth', material(cloth))}
+    ${gradient('hat', material(hat))}
+    ${gradient('metal', [['0%', '#ebf9ff'], ['32%', '#829fb5'], ['58%', '#304556'], ['83%', '#718b9d'], ['100%', '#182435']])}</defs>`;
+
+  // Traje y ropa de cabina. La luz lateral separa los hombros del fondo.
+  o += path('M11 120 14 108Q16 99 28 96L49 89H71L92 96Q104 99 107 109L110 120Z', paint('cloth'));
+  o += path('M11 120 15 106Q18 101 25 98L31 109 29 120ZM110 120 106 108Q103 102 94 98L91 108 94 120Z', shade(cloth, -.45));
+  o += stroke('M19 103Q25 98 34 97M21 106 27 119M98 103 94 118', '#ceebf9', 1, .37);
+  o += path('M24 118H83L94 120H22Z', '#051226', .55);
+  o += path('M51 74 70 74 71 89Q70 94 77 95Q61 108 43 96L49 92Z', paint('skin'));
+  o += path('M51 76H70V84Q63 92 51 90Z', skinDark, .72);
+  if (a.ropa === 0 || a.ropa === 3){
+    o += stroke('M46 95Q59 109 75 95', shade(cloth, -.43), 2.9);
+    o += stroke('M45 97Q59 112 76 97', shade(cloth, .46), .8, .7);
+    if (a.ropa === 3) o += `<g transform="translate(74 107) skewX(-14)" fill="${a.colorRopa === 2 || a.colorRopa === 8 ? '#062149' : '#79FFBA'}"><path d="M0 0H12V4H0ZM0 6H8V8H0Z"/></g>`;
+  } else if (a.ropa === 1){
+    o += path('M35 96 45 89 60 103 75 89 87 96 76 108 62 107 50 110Z', shade(cloth, -.42));
+    o += stroke('M40 96 49 104 59 105 72 104 80 96', shade(cloth, .5), 1.2, .78);
+    o += stroke('M52 106 51 117M68 106 69 115', '#c9d9e7', 1.4);
+    o += stroke('M51 116V118M69 114V116', '#6b7e8f', 1.6);
+  } else if (a.ropa === 2){
+    o += path('M49 89 60 101 50 108 41 96ZM71 89 60 101 70 108 79 96Z', shade(cloth, .72));
+    o += stroke('M60 102 58 120', shade(cloth, -.44), 2);
+    o += dot(59, 110, 1.2, '#d9e8ef') + dot(59, 116, 1.2, '#d9e8ef');
+  } else if (a.ropa === 4){
+    o += path('M49 91Q60 106 72 91L66 120H55Z', '#172a40');
+    o += path('M41 94 50 89 58 120H52L44 103 47 101ZM79 94 70 89 62 120H68L76 103 73 101Z', shade(cloth, .28));
+    o += stroke('M41 94 47 101 44 103 52 119M79 94 73 101 76 103 68 119', shade(cloth, -.5), 1.2);
+    o += stroke('M56 112 58 120M64 112 62 120M76 112H85', '#c0d4e6', 1, .68);
+  } else if (a.ropa === 5){
+    o += path('M37 93 44 88H76L83 93 78 103Q61 111 42 103Z', '#182838');
+    o += path('M37 93 44 88H76L83 93 77 100Q60 106 43 100Z', paint('metal'));
+    o += stroke('M42 94Q60 104 78 94M42 97Q60 107 78 97', '#0c1929', .8, .8);
+    o += path('M18 102 34 96 43 105 36 111 15 111ZM102 102 86 96 77 105 84 111 105 111Z', paint('metal'));
+    o += stroke('M49 105 46 120M70 105 74 120M60 107V120', '#0c1b2b', 1.4, .8);
+    o += path('M25 109H40L38 117H24Z', '#102535') + path('M27 111H36L35 114H26Z', '#79FFBA');
+    o += path('M77 110H91L93 117H79Z', '#142737') + dot(83, 113.4, 1.2, '#F2B33D') + dot(87, 113.4, 1.2, '#49E3E7');
+  }
+  if (a.acc === 3){
+    o += path('M60 95 49 90 47 92 48 102 60 98 72 102 73 92 71 90Z', acc);
+    o += stroke('M50 93 56 96 51 99M70 93 64 96 69 99', shade(acc, -.42), 1.1);
+    o += dot(60, 96.5, 2.4, shade(acc, .38));
+  }
+  if (a.acc === 4){
+    o += path('M44 89Q61 98 77 89L80 95 71 101 74 116 63 118 58 102 42 97Z', acc);
+    o += stroke('M45 92Q62 101 76 92M48 96Q60 102 73 97M68 102 72 115', shade(acc, -.36), 1.1);
+    o += stroke('M64 115 65 118M68 114 69 117', shade(acc, .56), 1);
+  }
+  if (a.acc === 5){
+    o += stroke('M48 91 60 107 72 91', acc, 3);
+    o += dot(60, 108, 6, '#a56f24') + dot(60, 107.4, 5, '#F2B33D');
+    o += path('M58 106H64L63 109H57Z', '#062149');
+  }
+  if (a.acc === 7){
+    o += path('M78 102 80.3 106 85 107 81.5 110.1 82 114.6 78 112.4 73.9 114.6 74.4 110.1 71 107 75.7 106Z', '#101c2a');
+    o += path('M78 103 79.8 106.9 83.7 107.4 80.8 110 81.2 113.5 78 111.7 74.8 113.5 75.2 110 72.3 107.4 76.2 106.9Z', acc);
+  }
+
+  // El volumen se arma por planos de luz, con la misma silueta para cada tono de piel.
+  if (a.pelo === 2){
+    o += path('M33 47Q31 18 59 19 84 16 89 45L87 69 92 98Q83 102 73 95L70 69H48L46 94Q39 104 28 97L34 78Z', paint('hair'));
+    o += stroke('M36 50Q39 74 33 94M84 55Q80 73 86 96M79 63Q77 82 81 94', hairLight, 1, .55);
+  }
+  if (a.pelo === 4){
+    o += path('M46 23Q44 12 52 8 64 1 73 13 77 20 69 26Z', paint('hair'));
+    o += stroke('M48 19Q53 9 64 10M52 21Q61 13 69 15', hairLight, 1.2, .72);
+  }
+  if (a.pelo === 6) o += path('M31 69Q20 63 23 54 18 46 24 39 23 31 30 28 30 22 39 20 42 12 50 15 56 8 63 13 72 9 78 16 87 16 90 25 98 30 96 39 104 45 98 53 103 65 89 70Z', paint('hair'));
+  if (a.pelo === 7){
+    o += path('M77 35Q90 28 98 41 102 52 97 76 89 71 88 58L80 47Z', paint('hair'));
+    o += stroke('M85 38Q97 44 93 67', hairLight, 1.2, .7) + stroke('M84 34 89 37', hat, 2.5);
+  }
+  if (a.pelo === 8){
+    o += path('M34 39Q35 18 58 19 86 15 90 44L93 81Q87 85 78 82L72 72H48L42 84Q32 86 27 80Z', paint('hair'));
+    o += stroke('M35 49Q36 66 33 80M85 54 88 79', hairLight, 1.2, .65);
+  }
+  o += path('M38 54Q29 49 30 59 31 69 40 68ZM82 54Q91 49 90 59 89 69 80 68Z', paint('skin'));
+  o += stroke('M34 55Q31 55 34 61L37 62M85 55Q89 54 86 61L83 62', skinDark, 1.4, .8);
+  o += path('M36 50Q36 27 56 25 80 23 84 47L83 65Q82 76 73 83L66 89Q61 92 54 88L46 83Q38 76 37 66Z', paint('skin'));
+  o += path('M75 39Q84 47 84 55L82 68Q80 79 67 88L64 89 70 83Q75 75 76 68 77 62 77 54Z', skinDark, .38);
+  o += path('M39 48Q42 35 54 34 49 42 49 47L45 58 40 63Z', skinLight, .58);
+  o += path('M42 63Q46 60 53 64 48 68 42 68ZM68 65Q73 60 79 64L76 69Z', '#d9776a', .24);
+  o += path('M57 53 62 52 64 62 61 65 54 63Z', skinDark, .29);
+  o += path('M59 54 60 54 60 60 63 63 59 64 56 63Z', skinLight, .77);
+  o += stroke('M55.5 64 58.5 65M62 65 64 63.5', skinDark, 1.1, .85);
+  o += path('M52 76Q60 79 68 76L64 81H55Z', skinLight, .36);
+  o += stroke('M47 79Q53 86 59 87', '#f4e8dd', .8, .32);
+
+  // Párpados, cejas y boca mantienen la expresión a escala de miniatura.
+  const brows = [
+    'M43 51Q48 47 55 50M65 49Q72 46 77 50',
+    'M43 53Q49 49 55 51M65 51Q72 48 77 52',
+    'M43 51Q49 48 55 50M65 50Q71 47 77 50',
+    'M43 51Q49 47 55 50M65 49Q72 44 77 48',
+    'M43 48Q48 42 55 46M65 46Q72 42 77 47',
+    'M43 52Q50 49 55 51M65 47Q71 42 77 47',
+    'M43 49 55 52M65 52 77 49'
+  ];
+  o += stroke(brows[a.cara], shade(hair, -.27), 2.15);
+  const eyelid = shade(skin, -.62);
+  const eye = (x, rise) => `<g transform="translate(${x} 57)">${path(`M-6 .5Q-1 ${-rise} 5 0 1 4.2-4 2.4Z`, '#f2e9e2')}
+    ${dot(-.2, .05, 2.45, '#4f655e')}${dot(-.1, .1, 1.45, '#0c1421')}${dot(-.95, -.85, .68, '#eefcff')}
+    ${stroke(`M-6 .5Q-1 ${-rise} 5 0`, eyelid, 1.15)}</g>`;
+  if (a.cara === 1) o += stroke('M44 57Q49 53 55 57M65 57Q71 53 76 57', eyelid, 1.65);
+  else if (a.cara === 3) o += eye(50, 5.1) + stroke('M65 57Q70 53 76 56', eyelid, 1.8);
+  else o += eye(50, a.cara === 4 ? 6.3 : 4.4) + eye(71, a.cara === 4 ? 6.3 : 4.4);
+
+  if (a.detalle === 3 || a.detalle === 4){
+    o += path('M37 60Q44 71 51 69 60 65 69 69 78 71 83 60L80 76Q75 89 61 92 47 91 41 79Z', hair, a.detalle === 3 ? .88 : .41);
+    o += path('M51 71Q60 68 70 71 68 80 59 81 53 79 51 71Z', skin);
+    o += stroke('M42 72 45 78M47 78 50 82M53 82 55 86M59 83V87M65 82 63 87M70 79 68 84M77 72 73 78', hairLight, .8, .5);
+  }
+  const mouthDark = '#442528', lips = a.piel > 2 ? '#a96554' : '#b96f66';
+  if (a.cara === 0){
+    o += path('M50 70Q60 74 71 69 66 78 60 78 54 77 50 70Z', mouthDark);
+    o += path('M52 71Q60 74 69 70 65 74 60 74 56 74 52 71Z', '#f7e4d7');
+  } else if (a.cara === 1){
+    o += path('M49 68Q60 71 72 68 69 80 60 80 52 79 49 68Z', mouthDark);
+    o += path('M50 69Q60 72 71 69L68 73Q60 75 53 73Z', '#f7e4d7');
+    o += path('M55 77Q59 74 67 77 61 80 55 77Z', lips);
+  } else if (a.cara === 4){
+    o += `<ellipse cx="60" cy="73.5" rx="4.3" ry="5.2" fill="${mouthDark}"/>` + path('M57 76Q60 74 63 76 60 79 57 76Z', lips);
+  } else {
+    const mouths = { 2: 'M53 73Q60 71 67 73', 3: 'M52 72Q62 76 70 69', 5: 'M53 73Q63 74 70 68', 6: 'M53 73 60 71.5 67 73' };
+    o += stroke(mouths[a.cara], mouthDark, 1.6);
+    o += stroke('M57 75Q60 76 63 75', lips, 1.1, .8);
+  }
+  if (a.detalle === 1) o += [[43, 62], [47, 64], [50, 62.6], [45, 65.6], [71, 62.5], [75, 63], [77, 65.2], [73, 65.8]].map(([x, y], i) => dot(x, y, i % 2 ? .63 : .88, skinDark)).join('');
+  if (a.detalle === 2){
+    o += path('M49 70Q54 64 60 67 66 64 71 70 65 71 60 69 55 71 49 70Z', hair);
+    o += stroke('M52 69Q56 66 58 68M62 68Q65 66 68 69', hairLight, .75, .65);
+  }
+  if (a.detalle === 5) o += dot(72.4, 70, 1.25, skinDark);
+  if (a.detalle === 6) o += '<g transform="rotate(-24 74 46)"><rect x="67.5" y="43.5" width="13" height="5" rx="2.4" fill="#eccda7"/><path d="M72 44h4v4h-4z" fill="#dba971"/><path d="M69.5 45.5h1m7.5 1h1" stroke="#c0956f" stroke-linecap="round"/></g>';
+
+  if (a.lentes){
+    const frame = AV.colorLentes[a.colorLentes], glass = a.lentes === 9 ? '#132537' : '#91dcf4';
+    const frames = [
+      '', 'M43 57a7.5 7.5 0 1 0 15 0a7.5 7.5 0 1 0-15 0Z',
+      'M43 52H58V62H43Z', 'M42 50Q42 48 46 48H56Q59 48 59 52V61Q59 65 55 65H46Q42 65 42 61Z',
+      'M41 51Q51 51 58 55 58 62 51 63 45 63 43 56Z', 'M43 54H58Q57 63 50 63 44 62 43 54Z',
+      'M43 53Q50 50 58 53 57 64 50 65 43 63 43 53Z', 'M46 51H54L58 57 54 63H46L42 57Z',
+      'M44 58H57V62Q57 64 54 64H47Q44 64 44 62Z',
+      'M42 52Q42 51 46 51H56Q59 51 59 54V58Q59 64 51 64 42 64 42 57Z'
+    ];
+    const lens = d => `<path d="${d}" fill="${glass}" fill-opacity="${a.lentes === 9 ? .93 : .15}" stroke="${frame}" stroke-width="${a.lentes === 5 ? 1 : 1.85}" stroke-linejoin="round"/>`;
+    if (a.lentes === 10){
+      o += '<path d="M38 51Q60 47 82 51L80 63Q59 69 40 63Z" fill="#54b5d3" fill-opacity=".52" stroke="#243951" stroke-width="3"/>';
+      o += stroke('M38 51Q60 47 82 51L80 63Q59 69 40 63Z', frame, 1.9);
+      o += path('M44 51 53 50 47 64 43 63Z', '#d9f9ff', .48);
+      o += stroke('M56 52Q67 51 77 53M74 60H77', '#e1faff', .9, .8);
+    } else {
+      o += stroke(a.lentes === 8 ? 'M43 59 37 55M77 59 83 55M56 59Q60 57 64 59' : 'M43 55 37 54M77 55 83 54M58 55Q60 53 62 55', frame, 1.6);
+      o += lens(frames[a.lentes]) + `<g transform="translate(120 0) scale(-1 1)">${lens(frames[a.lentes])}</g>`;
+      if (a.lentes === 5) o += stroke('M43 54H58M62 54H77', frame, 2.2);
+      if (a.lentes === 6) o += stroke('M57 52H63', frame, 1.1);
+      if (a.lentes !== 8) o += stroke('M46 54 44.5 57M67 54 65.5 57', '#e3faff', .85, .8);
+    }
+  }
+
+  const crowns = [
+    'M35 54Q33 39 39 28 45 20 59 22 72 18 81 30 87 39 84 54L79 45Q76 37 67 35 56 41 47 37 42 45 35 54Z',
+    'M35 55Q29 39 38 29 45 20 61 21 78 19 86 36 91 49 83 57L81 47Q78 45 73 39 64 48 58 43 53 46 51 41 43 48 38 45Z',
+    'M34 58Q31 42 36 33 43 19 59 19 78 15 87 37 90 46 84 58L80 49Q72 40 66 33 54 42 42 44Z',
+    'M34 56Q28 53 30 47 25 42 30 37 27 29 36 27 36 20 45 22 49 15 56 20 63 14 69 20 76 17 80 23 90 22 89 32 95 37 91 43 96 47 86 56L81 50Q78 49 77 42 70 45 67 39 63 44 57 41 54 47 48 44 47 49 40 46Z',
+    'M36 55Q34 42 38 33 44 23 56 24 76 20 82 36 86 45 83 54L78 44Q70 40 64 32 52 40 43 44Z',
+    'M36 50Q36 29 55 26 78 21 84 45L80 45Q77 37 66 35 49 32 39 48Z',
+    'M28 58Q23 41 33 28 42 15 63 17 88 13 95 43 97 54 88 57L82 49Q79 40 71 38 58 32 46 41 38 43 35 54Z',
+    'M36 54Q33 42 38 32 46 21 59 24 79 22 84 44L83 52 76 43Q67 39 64 32 50 42 42 43Z',
+    'M34 60Q30 46 35 34 40 22 56 20 77 17 85 37 88 46 85 61L78 52Q67 43 61 35 49 44 41 47Z',
+    'M36 51Q33 42 39 31 49 23 62 26 80 22 84 47L82 51 75 40 63 35Q50 37 42 44Z'
+  ];
+  o += path(crowns[a.pelo], paint('hair'), a.pelo === 5 || a.pelo === 9 ? .53 : 1);
+  if (a.pelo === 3 || a.pelo === 6){
+    o += stroke('M34 41Q29 31 39 32 42 24 49 28 52 21 59 25 64 20 68 26 75 23 79 30 86 29 87 37M39 39Q43 33 48 37M52 34Q57 29 61 33M65 33Q71 28 75 33M80 38Q87 37 86 43', hairLight, 1.4, .65);
+    if (a.pelo === 6) o += stroke('M28 40Q26 34 31 33M40 24Q42 20 48 22M53 19Q57 15 61 18M71 19Q76 18 79 23M93 43Q96 47 92 50', hairLight, 1.1, .6);
+  } else if (a.pelo === 5){
+    o += stroke('M42 38 44 36M46 34 48 32M51 32 53 30M57 31 59 29M63 31 66 29M70 32 72 31M76 35 78 35', hairDark, .9, .6);
+  } else {
+    o += stroke('M38 42Q43 28 61 26M43 40Q49 32 61 30M67 26Q78 28 81 40', hairLight, 1.25, .68);
+    o += stroke('M40 44Q45 40 49 39M63 28Q63 32 61 33M72 33Q78 34 81 43', hairDark, 1.1, .9);
+  }
+  if (a.pelo === 9 && !a.gorro){
+    o += path('M51 38Q47 18 53 11L56 13Q58 5 64 4L63 12 69 8 67 39Z', paint('hair'));
+    o += stroke('M55 34Q52 21 59 13M59 31 64 14', hairLight, 1.15, .76);
+  }
+
+  if (a.gorro === 1){
+    o += stroke('M35 44Q58 27 85 44', shade(hat, -.45), 7.8);
+    o += stroke('M35 42Q58 25 85 42', hat, 5.3);
+    o += stroke('M35 41Q58 24 85 41', shade(hat, .58), 1, .84);
+    o += path('M70 35 76 36 73 40 67 39Z', '#79FFBA');
+  }
+  if (a.gorro === 2){
+    o += path('M32 47Q31 29 44 21 61 12 76 22 86 29 86 46Z', paint('hat'));
+    o += stroke('M40 43Q41 26 58 20M74 44Q75 26 59 20', shade(hat, .47), .9, .8);
+    o += path('M48 43Q74 39 101 46 98 53 64 49L48 48Z', shade(hat, -.45));
+    o += stroke('M50 44Q75 40 98 46', shade(hat, .44));
+    o += dot(59, 19.5, 2.35, shade(hat, -.19));
+  }
+  if (a.gorro === 3){
+    o += dot(59, 13, 6.3, shade(hat, .4));
+    o += path('M33 44Q32 21 50 16 65 9 79 22 86 29 87 45Z', paint('hat'));
+    o += stroke('M39 42Q39 26 51 21M45 41Q45 24 57 19M53 39Q53 24 60 18M63 39Q64 25 63 18M72 40Q72 26 68 21M79 41Q80 30 75 24', shade(hat, .43), 1.2, .65);
+    o += path('M32 42Q59 36 88 42L87 50Q60 46 33 51Z', shade(hat, -.31));
+    o += stroke('M37 42 38 49M43 41 44 48M49 40 50 47M55 40 56 47M61 40V46M67 40V46M73 41V47M79 41V47M84 42V48', shade(hat, .27), .95, .85);
+  }
+  if (a.gorro === 4){
+    o += path('M30 36Q19 26 39 19 62 11 82 24 92 30 81 40L41 44Z', paint('hat'));
+    o += stroke('M30 33Q43 22 60 23M38 41Q61 35 82 37', shade(hat, .42), 1.25, .79);
+    o += path('M33 37Q59 34 83 34L81 41Q58 43 39 46Z', shade(hat, -.42));
+    o += dot(53, 18, 2.6, shade(hat, -.16));
+  }
+  if (a.gorro === 5){
+    o += `<ellipse cx="60" cy="37" rx="31" ry="6" fill="${shade(hat, -.48)}"/>`;
+    o += path('M41 4Q60 0 79 4L76 35Q60 39 44 35Z', paint('hat'));
+    o += path('M43 26Q59 30 77 26L77 32Q59 36 44 32Z', a.colorGorro === 2 ? '#062149' : '#79FFBA');
+    o += stroke('M42 5Q60 8 78 5M47 11 49 24M30 37Q60 46 90 37', shade(hat, .53), 1.1);
+  }
+  if (a.gorro === 6){
+    const visor = 'M27 55Q27 35 43 25 57 17 72 23 92 30 93 55 93 76 79 84H41Q27 75 27 55Z';
+    const shell = 'M20 54C20 31 37 15 60 15S100 32 100 54Q100 79 82 89H38Q20 79 20 54Z';
+    o += `<path d="${shell}${visor}" fill="${paint('metal')}" fill-rule="evenodd"/>`;
+    o += stroke('M20 54Q21 35 36 24 48 15 60 15 79 16 91 31 100 41 100 54', hat, 4);
+    o += path(visor, '#5ebadd', .16);
+    o += path('M29 48Q33 29 51 24L54 25Q45 32 39 45Z', '#ecfaff', .47);
+    o += stroke('M78 28Q89 34 91 46M28 61Q31 70 37 75', '#d9faff', 1.1, .59);
+    o += path('M17 49 24 47 27 51 26 70 20 72 17 68ZM103 49 96 47 93 51 94 70 100 72 103 68Z', paint('metal'));
+    o += path('M19 52 23 51V66L19 67ZM101 52 97 51V66L101 67Z', shade(hat, -.31));
+    o += path('M32 83H88L85 93H35Z', paint('metal'));
+    o += stroke('M37 88H83', '#24394c', 1.35) + stroke('M48 90H55M65 90H72', '#79FFBA', 1.35);
+  }
+  if (a.gorro === 7){
+    o += path('M38 39 39 19 51 28 60 12 69 28 81 19 82 39Q60 34 38 39Z', paint('hat'));
+    o += stroke('M38 36Q60 32 82 36M40 21 51 30 60 15 69 30 80 21', shade(hat, .56), 1.25);
+    o += path('M60 24 64 29 60 34 56 29Z', '#da624e') + path('M60 25 62 28 59 30Z', '#ffc29c');
+    o += dot(47, 31.5, 1.65, '#49E3E7') + dot(73, 31.5, 1.65, '#49E3E7');
+  }
+  if (a.acc === 1){
+    o += stroke('M35 65C28 68 32 77 36 73L37 70M85 65C92 68 88 77 84 73L83 70', acc, 1.8);
+    o += dot(35, 66, 1.1, shade(acc, .63)) + dot(85, 66, 1.1, shade(acc, .63));
+  }
+  if (a.acc === 2){
+    o += stroke('M30 56Q28 28 48 22 61 17 73 22 92 29 90 56', shade(acc, -.42), 5);
+    o += stroke('M30 54Q28 28 48 22 61 18 73 22 92 29 90 54', acc, 2.5);
+    o += `<rect x="24" y="51" width="12" height="18" rx="5" fill="${acc}"/><rect x="84" y="51" width="12" height="18" rx="5" fill="${acc}"/>`;
+    o += stroke('M28 54V65M92 54V65', shade(acc, .61), 1.2);
+    o += stroke('M87 66Q83 75 71 74', '#283a4f', 1.65) + dot(70.6, 74, 1.1, shade(acc, .28));
+  }
+  if (a.acc === 6){
+    o += stroke('M44 27 39 11M76 27 81 11', '#18324a', 3.5);
+    o += stroke('M44 26 39 11M76 26 81 11', shade(acc, .31), 1.1);
+    o += dot(39, 10, 3.55, acc) + dot(81, 10, 3.55, acc);
+    o += dot(38, 9, .9, shade(acc, .74)) + dot(80, 9, .9, shade(acc, .74));
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb || '0 0 120 120'}" width="120" height="120" aria-hidden="true" focusable="false">${o}</svg>`;
+}
+
+/* ===== Cielo ===== */
+const sky = $('sky'), sctx = sky.getContext('2d');
+function paintSky(){
+  const d = Math.min(devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
+  sky.width = w * d; sky.height = h * d; sky.style.width = w + 'px'; sky.style.height = h + 'px';
+  sctx.setTransform(d, 0, 0, d, 0, 0);
+  const g = sctx.createRadialGradient(w * .85, h * .1, 0, w * .85, h * .1, Math.max(w, h) * .8);
+  g.addColorStop(0, 'rgba(0,86,243,.28)'); g.addColorStop(1, 'rgba(0,86,243,0)');
+  sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 200; i++){ const z = Math.random(); sctx.fillStyle = `rgba(255,255,255,${.2 + z * .6})`; sctx.fillRect(Math.random() * w, Math.random() * h, z * 1.8, z * 1.8); }
+}
+addEventListener('resize', paintSky); paintSky();
+
+function show(id){ const changed = $(id).hidden; for (const s of ['s-profile', 's-lobby', 's-wait', 's-play', 's-live']) $(s).hidden = s !== id; document.body.classList.toggle('livemode', id === 's-live'); if (changed) window.scrollTo(0, 0); const ig = id === 's-wait' || id === 's-play'; $('gear').hidden = !ig; document.body.classList.toggle('ingame', ig); }
+
+/* ===== Perfil y puntos ===== */
+const LS = 'odisea-jugador', LSW = 'odisea-puntos';
+let profile = null, draft = null, tab = 'pelo';
+let wallet = { puntos: 0, unlocked: [], games: [] };
+try {
+  const w = JSON.parse(localStorage.getItem(LSW) || 'null');
+  if (w) wallet = { puntos: Math.max(0, Math.floor(+w.puntos || 0)), unlocked: Array.isArray(w.unlocked) ? w.unlocked.map(String) : [], games: Array.isArray(w.games) ? w.games.map(String).slice(-30) : [] };
+} catch (e) {}
+function saveWallet(){ try { localStorage.setItem(LSW, JSON.stringify(wallet)); } catch (e) {} }
+const price = (k, i) => ((PRECIOS[k] || [])[i]) || 0;
+const owned = (k, i) => price(k, i) === 0 || wallet.unlocked.includes(k + ':' + i);
+try {
+  const s = JSON.parse(localStorage.getItem(LS) || 'null');
+  if (s && s.name && AREA[s.area]) profile = { name: String(s.name).slice(0, 18), area: s.area, av: cleanAvatar(s.av || randomAvatar()) };
+} catch (e) {}
+
+$('areaPick').innerHTML = CONFIG.areas.map(a => `<button class="area" type="button" data-a="${a.id}" aria-pressed="false"><b>${a.nombre}</b><span>${a.hace}</span></button>`).join('');
+$('areaPick').querySelectorAll('.area').forEach(b => b.onclick = () => {
+  draft.area = b.dataset.a;
+  $('areaPick').querySelectorAll('.area').forEach(x => x.setAttribute('aria-pressed', x === b));
+});
+
+function renderStudio(){
+  $('preview').innerHTML = avatarSVG(draft.av);
+  $('ptsLbl').textContent = `⭐ ${wallet.puntos} puntos`;
+  const tabs = $('tabs'); tabs.innerHTML = '';
+  for (const [id, label] of TABS){
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', id === tab); b.textContent = label;
+    b.onclick = () => { tab = id; renderStudio(); };
+    tabs.appendChild(b);
+  }
+  const panel = $('tabpanel'); panel.innerHTML = '';
+  const title = text => { const h = document.createElement('p'); h.className = 'tp-title'; h.textContent = text; panel.appendChild(h); };
+  const thumbs = (k, text, vb, base) => {
+    title(text);
+    const g = document.createElement('div'); g.className = 'thumbs';
+    AV[k].forEach((name, i) => {
+      const has = owned(k, i), b = document.createElement('button');
+      b.type = 'button'; b.className = 'thumb' + (has ? '' : ' locked'); b.title = name;
+      b.setAttribute('aria-pressed', draft.av[k] === i);
+      b.setAttribute('aria-label', name + (has ? '' : `, se desbloquea con ${price(k, i)} puntos`));
+      b.innerHTML = avatarSVG({ ...draft.av, ...base, [k]: i }, vb) + `<span class="nm">${name}</span>` + (has ? '' : `<span class="price">🔒 ${price(k, i)}</span>`);
+      b.onclick = () => { draft.av[k] = i; renderStudio(); };
+      g.appendChild(b);
+    });
+    panel.appendChild(g);
+  };
+  const swatches = (k, text) => {
+    title(text);
+    const g = document.createElement('div'); g.className = 'swatches';
+    AV[k].forEach((v, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = v;
+      b.setAttribute('aria-label', AV_NAMES[k][i]); b.title = AV_NAMES[k][i]; b.setAttribute('aria-pressed', draft.av[k] === i);
+      b.onclick = () => { draft.av[k] = i; renderStudio(); };
+      g.appendChild(b);
+    });
+    panel.appendChild(g);
+  };
+  if (tab === 'pelo'){ thumbs('pelo', 'Peinado', '12 0 96 96', { gorro: 0, acc: 0 }); swatches('colorPelo', 'Color del pelo'); }
+  else if (tab === 'cara'){ thumbs('cara', 'Expresión', '24 30 72 72', {}); thumbs('detalle', 'Detalles', '24 30 72 72', {}); }
+  else if (tab === 'piel'){ swatches('piel', 'Tono de piel'); }
+  else if (tab === 'ropa'){ thumbs('ropa', 'Ropa', '10 44 100 76', { acc: 0 }); swatches('colorRopa', 'Color de la ropa'); }
+  else if (tab === 'gorro'){ thumbs('gorro', 'Gorro', '8 0 104 104', {}); swatches('colorGorro', 'Color del gorro'); }
+  else if (tab === 'lentes'){ thumbs('lentes', 'Lentes', '26 32 68 50', {}); swatches('colorLentes', 'Color del marco'); }
+  else { thumbs('acc', 'Accesorio', '0 0 120 120', {}); swatches('colorAcc', 'Color del accesorio'); }
+
+  // barra para desbloquear lo que se está probando
+  const bar = $('buybar'), locked = Object.keys(PRECIOS).find(k => !owned(k, draft.av[k]));
+  bar.innerHTML = '';
+  if (!locked){ bar.hidden = true; return; }
+  const i = draft.av[locked], p = price(locked, i), txt = document.createElement('span');
+  bar.hidden = false;
+  if (wallet.puntos >= p){
+    txt.textContent = `Estás probando ${AV[locked][i]}.`;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cta sm'; b.textContent = `Desbloquear por ${p} ⭐`;
+    b.onclick = () => { wallet.puntos -= p; wallet.unlocked.push(locked + ':' + i); saveWallet(); renderStudio(); if (profile) renderMe(); };
+    bar.append(txt, b);
+  } else {
+    txt.textContent = `${AV[locked][i]} cuesta ${p} ⭐ y tenés ${wallet.puntos}. Ganá puntos jugando en grupo: +${PUNTOS.meta} si llegan las 40 naves, +${PUNTOS.aprobado} si aprueban.`;
+    bar.append(txt);
+  }
+}
+function openProfile(){
+  draft = profile ? { name: profile.name, area: profile.area, av: { ...profile.av } } : { name: '', area: '', av: randomAvatar() };
+  $('pname').value = draft.name; $('profErr').textContent = '';
+  $('areaPick').querySelectorAll('.area').forEach(x => x.setAttribute('aria-pressed', x.dataset.a === draft.area));
+  $('profTitle').textContent = profile ? 'Editá tu tripulante' : 'Armá tu tripulante';
+  $('cancelProfile').hidden = !profile;
+  renderStudio(); show('s-profile');
+}
+$('randomize').onclick = () => {
+  const r = randomAvatar();
+  for (const k of Object.keys(PRECIOS)) if (!owned(k, r[k])) r[k] = 0;
+  draft.av = r; renderStudio();
+};
+$('cancelProfile').onclick = () => (nr || solo) ? show('s-wait') : show('s-lobby');
+$('editProfile').onclick = openProfile;
+$('saveProfile').onclick = () => {
+  const name = $('pname').value.trim().slice(0, 18);
+  if (!name){ $('profErr').textContent = 'Escribí tu nombre.'; $('pname').focus(); return; }
+  if (!draft.area){ $('profErr').textContent = 'Elegí tu área.'; return; }
+  const locked = Object.keys(PRECIOS).find(k => !owned(k, draft.av[k]));
+  if (locked){ $('profErr').textContent = `Desbloqueá ${AV[locked][draft.av[locked]]} o elegí otra opción.`; return; }
+  profile = { name, area: draft.area, av: cleanAvatar(draft.av) };
+  try { localStorage.setItem(LS, JSON.stringify(profile)); } catch (e) {}
+  renderMe();
+  if (nr || solo){ if (nr) nr.presence({ name: profile.name, area: profile.area, av: profile.av, host: isHost }).catch(() => {}); seatKey = ''; show('s-wait'); renderWait(); }
+  else show('s-lobby');
+};
+function renderMe(){
+  $('meAv').innerHTML = avatarSVG(profile.av);
+  $('meName').textContent = profile.name;
+  $('meArea').textContent = AREA[profile.area].nombre;
+  $('mePts').textContent = `⭐ ${wallet.puntos}`;
+}
+if (profile){ renderMe(); show('s-lobby'); } else openProfile();
+
+function awardPoints(){
+  // se llama al terminar una partida; suma puntos una sola vez por partida y solo en grupo
+  const el = $('ePts');
+  if (solo){ el.textContent = 'En modo práctica no se suman puntos. Jugá en grupo para ganar ⭐ y desbloquear gorros y accesorios.'; return; }
+  if (!S.gid) { el.textContent = ''; return; }
+  const all = S.cleared >= CONFIG.etapas.length - 1;
+  const pts = S.broken ? PUNTOS.nave_rota : !all ? PUNTOS.participar : S.crew >= META ? PUNTOS.meta : S.crew >= APROB ? PUNTOS.aprobado : PUNTOS.participar;
+  if (!wallet.games.includes(S.gid)){
+    wallet.games.push(S.gid); wallet.games = wallet.games.slice(-30); wallet.puntos += pts; saveWallet(); renderMe();
+  }
+  el.textContent = `+${pts} ⭐ para tu tripulante. Ahora tenés ${wallet.puntos} puntos para desbloquear gorros y accesorios.`;
+}
+
+/* ===== Conexión ===== */
+let room = null, nr = null, solo = false, isHost = false, code = '', myPeer = 'local';
+const handlers = {};
+/* ===== Conexión en línea con Supabase (para cuando el juego está publicado fuera de claude.ai, por ejemplo en GitHub Pages) ===== */
+const SUPA = { url: '', key: '' }; // Copia histórica. Para jugar en grupo, usá la versión nueva.
+function supaRoom(){
+  // Ofrece las mismas funciones que la sala de claude.ai (unirse, enviar, escuchar, presencia), pero sobre Supabase Realtime.
+  const sb = window.supabase.createClient(SUPA.url, SUPA.key, { auth: { persistSession: false }, realtime: { params: { eventsPerSecond: 30 } } });
+  const myId = 'j' + Math.random().toString(36).slice(2, 10);
+  function open(name){
+    return new Promise((resolve, reject) => {
+      const hs = {}, peerCbs = []; let pres = null, done = false;
+      const ch = sb.channel('odisea:' + name, { config: { broadcast: { self: true }, presence: { key: myId } } });
+      ch.on('broadcast', { event: '*' }, msg => {
+        const pl = msg.payload || {};
+        (hs[msg.event] || []).forEach(f => { try { f({ topic: msg.event, data: pl.d, peer: pl.p, isMe: pl.p === myId, sameTab: pl.p === myId }); } catch (e) {} });
+      });
+      ch.on('presence', { event: 'sync' }, () => peerCbs.forEach(f => { try { f(); } catch (e) {} }));
+      const api = {
+        emit(topic, data){ return Promise.resolve(ch.send({ type: 'broadcast', event: topic, payload: { p: myId, d: data } })).then(() => {}); },
+        on(topic, f){ (hs[topic] = hs[topic] || []).push(f); return () => { hs[topic] = (hs[topic] || []).filter(x => x !== f); }; },
+        presence(patch){ pres = { ...(pres || {}), ...patch }; return Promise.resolve(ch.track(pres)).then(() => {}); },
+        peers(){ const st = ch.presenceState(); return Object.keys(st).map(k => ({ peer: k, presence: (st[k] && st[k][0]) || {}, isMe: k === myId, sameTab: k === myId })); },
+        onPeers(f){ peerCbs.push(f); setTimeout(f, 0); return () => {}; },
+        connected(){ return ch.state === 'joined'; },
+        leave(){ return Promise.resolve(sb.removeChannel(ch)).then(() => {}); }
+      };
+      const to = setTimeout(() => { if (!done){ done = true; reject({ code: 'upstream_error' }); } }, 10000);
+      ch.subscribe(status => {
+        if (status === 'SUBSCRIBED'){
+          if (!done){ done = true; clearTimeout(to); resolve(api); }
+          else if (pres) ch.track(pres);   // tras una reconexión, volver a anunciarse
+        } else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && !done){ done = true; clearTimeout(to); reject({ code: 'upstream_error' }); }
+      });
+    });
+  }
+  let lobbyP = null;
+  const lobby = () => lobbyP || (lobbyP = open('lobby').catch(e => { lobbyP = null; throw e; }));
+  return {
+    emit: (t, d) => lobby().then(r => r.emit(t, d)),
+    on(t, f){ lobby().then(r => r.on(t, f)).catch(() => {}); return () => {}; },
+    join: name => open(name)
+  };
+}
+const supaReady = () => !!(window.supabase && window.supabase.createClient && /^https:\/\//.test(SUPA.url) && SUPA.key && SUPA.key.indexOf('__') !== 0);
+const roomP = (async () => {
+  try {
+    if (window.claude && window.claude.use) room = await claude.use('room');
+    else if (supaReady()) room = supaRoom();
+  } catch (e) {}
+  return room;
+})();
+const PERM_MSG = 'Tu acceso a este juego es de solo lectura, así que tus controles no llegan a la nave. Pedí acceso de Colaborador (o más) a quien compartió el juego.';
+let permWarned = false;
+function warnPerm(){ if (permWarned) return; permWarned = true; $('waitMsg').textContent = PERM_MSG; $('lobbyErr').textContent = PERM_MSG; if (typeof ticker === 'function') ticker(PERM_MSG); }
+function joinError(e){
+  const c = e && e.code;
+  if (c === 'not_granted') return 'Para jugar en grupo tenés que abrir el juego con tu cuenta de claude.ai de la organización. Con un link público o sin iniciar sesión no se puede.';
+  if (c === 'not_permitted') return 'Tu cuenta no puede usar el modo en grupo de este juego. Pedí acceso de Colaborador (o más) a quien lo compartió; tiene que ser alguien de la misma organización.';
+  if (c === 'limit_reached') return 'No se pudo abrir otra sala en este momento. Probá de nuevo en un rato.';
+  if (c === 'upstream_error') return 'La conexión tardó demasiado. Probá de nuevo en unos segundos.';
+  return 'No se pudo entrar a la partida' + (c ? ` (código: ${c})` : '') + '. Probá de nuevo en unos segundos.';
+}
+
+async function send(topic, data){
+  if (solo){ setTimeout(() => handlers[topic] && handlers[topic]({ topic, data, peer: 'local', isMe: true, sameTab: true }), 0); return; }
+  if (nr) try { await nr.emit(topic, data); } catch (e) { if (e && e.code === 'not_permitted') warnPerm(); }
+}
+function playersNow(){
+  if (solo) return [{ p: 'local', name: profile.name, area: profile.area, av: profile.av }];
+  const list = [];
+  for (const pr of nr ? nr.peers() : []){
+    const pres = pr.presence || {};
+    if (typeof pres.area === 'string' && AREA[pres.area]) list.push({ p: pr.peer, name: String(pres.name || 'Sin nombre').slice(0, 18), area: pres.area, av: cleanAvatar(pres.av) });
+  }
+  return list;
+}
+
+async function enterRoom(c, host){
+  $('lobbyErr').textContent = 'Conectando…';
+  await roomP;
+  if (!room){ $('lobbyErr').textContent = 'No se pudo conectar con el servidor del juego. Revisá tu conexión y recargá la página, o probá Practicar solo.'; return; }
+  try { nr = await room.join('od-' + c); }
+  catch (e) { $('lobbyErr').textContent = joinError(e); return; }
+  $('lobbyErr').textContent = '';
+  code = c; isHost = host; solo = false;
+  await nr.presence({ name: profile.name, area: profile.area, av: profile.av, host }).catch(() => {});
+  if (!host) send('act', { type: 'ping' }); // avisa enseguida si la cuenta no puede jugar
+  nr.on('st', m => handlers.st && handlers.st(m));
+  nr.on('act', m => handlers.act && handlers.act(m));
+  nr.onPeers(() => {
+    const me = nr.peers().find(p => p.sameTab); if (me) myPeer = me.peer;
+    if (isHost) dirty = true;
+    checkHost();
+    renderWait();
+  });
+  $('waitCode').textContent = c.toUpperCase();
+  show('s-wait'); renderWait();
+  if (isHost) startHost();
+}
+$('create').onclick = () => {
+  const abc = 'abcdefghjkmnpqrstuvwxyz23456789';
+  enterRoom(Array.from({ length: 4 }, () => abc[Math.floor(Math.random() * abc.length)]).join(''), true);
+};
+$('joinBtn').onclick = () => {
+  const c = $('codeIn').value.trim().toLowerCase();
+  if (!/^[a-z0-9]{4}$/.test(c)){ $('lobbyErr').textContent = 'El código tiene 4 letras o números.'; return; }
+  enterRoom(c, false);
+};
+$('practice').onclick = () => {
+  solo = true; isHost = true; code = 'solo'; myPeer = 'local';
+  $('waitCode').textContent = 'SOLO';
+  show('s-wait'); startHost(); renderWait();
+};
+
+/* ===== Lógica del anfitrión ===== */
+let G = null, dirty = true, hostTimer = null, lastSend = 0, lastTick = 0, lastBoard = 0;
+function newGame(){
+  return { code, nombre: '', gid: Math.random().toString(36).slice(2, 10), phase: 'lobby', stage: 0, done: 0, need: 0, crew: CONFIG.naves, ins: {}, vals: {}, seq: 0, until: 0, cleared: -1,
+    losses: Array(CONFIG.etapas.length).fill(0), players: [], hull: JUEGO.casco, fires: [], fireSeq: 0, burn: 0,
+    manos: JUEGO.manosPorEtapa, ev: [], evSeq: 0, broken: false, errs: 0, own: {}, epoch: 0, recent: {}, stats: { ok: 0, err: 0, fail: 0, help: 0, out: 0 } };
+}
+const NAVES = ['Orión', 'Andrómeda', 'Vega', 'Lyra', 'Casiopea', 'Pegaso', 'Fénix', 'Draco', 'Sirio', 'Altair', 'Polaris', 'Antares'];
+function startHost(){
+  G = newGame();
+  G.nombre = 'Nave ' + NAVES[Math.floor(Math.random() * NAVES.length)]; $('groupName').value = G.nombre;
+  runHost();
+}
+function runHost(){ handlers.act = onAct; clearInterval(hostTimer); lastTick = Date.now(); hostTimer = setInterval(hostTick, 200); }
+function takeOver(){
+  // Quien llevaba la partida se desconectó: esta persona reconstruye el estado con lo último que recibió y sigue.
+  if (isHost || solo || !S || !nr) return;
+  const now = Date.now(), g = newGame();
+  Object.assign(g, { code, gid: S.gid || g.gid, nombre: S.nombre || '', phase: S.phase, stage: S.stage, cleared: S.cleared, done: S.done, need: S.need, crew: S.crew,
+    vals: { ...(S.vals || {}) }, seq: S.seq || 0, until: now + (S.betweenLeft || 0) * 1000 + 1500, losses: [...(S.losses || g.losses)], hull: S.hull, fires: [...(S.fires || [])],
+    fireSeq: S.fireSeq || 0, manos: S.manos, ev: [...(S.ev || [])], broken: !!S.broken, errs: S.errs || 0, stats: { ...g.stats, ...(S.stats || {}) }, epoch: (S.epoch || 0) + 1 });
+  g.evSeq = g.ev.length ? g.ev[g.ev.length - 1].i : 0;
+  for (const [p, o] of Object.entries(S.ins || {})){
+    if (!CTL[o.c]) continue;
+    g.ins[p] = { id: o.id, c: o.c, kind: o.kind, target: o.target, text: o.t, until: now + o.left * 1000 + 3000, dur: o.dur + 3, x: (o.x || 0) + 1, prev: '' };
+  }
+  if (S.set) SET = { ...SET, ...S.set };
+  G = g; isHost = true; hostPeer = myPeer; curEpoch = g.epoch;
+  $('groupName').value = G.nombre;
+  nr.presence({ host: true }).catch(() => {});
+  runHost(); ev('host', myPeer); dirty = true;
+  renderWait();
+}
+function stepDown(){
+  // Volvió quien llevaba la partida pero otra persona ya tomó el mando: deja de dirigir y sigue como jugador.
+  isHost = false; clearInterval(hostTimer); hostTimer = null; G = null; handlers.act = null;
+  if (nr) nr.presence({ host: false }).catch(() => {});
+  renderWait();
+}
+function checkHost(){
+  if (isHost || solo || !nr || !S) return;
+  const max = JUEGO.silencioMax * 1000, silent = Date.now() - lastStAt;
+  const hostHere = nr.peers().some(p => p.peer === hostPeer);
+  if ((!hostHere && silent > 2500) || silent > max){
+    // Toma el mando la persona con el identificador más chico entre quienes siguen conectados (todos calculan lo mismo).
+    // Si esa persona tampoco responde, pasa a la siguiente.
+    const list = playersNow().map(p => p.p).filter(p => p !== hostPeer).sort();
+    const idx = silent > max ? Math.min(list.length - 1, Math.floor((silent - max) / max)) : 0;
+    if (list[idx] === myPeer) takeOver();
+  }
+}
+setInterval(checkHost, 1000);
+function ev(k, p, extra){ G.ev.push({ i: ++G.evSeq, k, p, ...extra }); if (G.ev.length > 14) G.ev.shift(); dirty = true; }
+function needFor(n){ return Math.min(18, 6 + n * 2); }
+function makeOrder(){
+  const present = [...new Set(G.players.map(p => p.area))];
+  const busy = new Set(Object.values(G.ins).map(x => x.c));
+  const foco = CONFIG.etapas[G.stage].foco;
+  let pool = [];
+  for (const c of Object.values(CTL)){
+    if (!present.includes(c.area) || busy.has(c.id) || !activeIn(c, G.stage)) continue;
+    const w = foco.includes(c.area) ? 3 : 1;
+    for (let k = 0; k < w; k++) pool.push(c);
+  }
+  if (!pool.length) pool = Object.values(CTL).filter(c => present.includes(c.area) && activeIn(c, G.stage));
+  const c = pool[Math.floor(Math.random() * pool.length)];
+  let target = null, text;
+  if (c.kind === 'b') text = `Presioná ${c.label}`;
+  else if (c.kind === 't'){ target = !G.vals[c.id]; text = (target ? 'Encendé ' : 'Apagá ') + c.label; }
+  else { const cur = G.vals[c.id] || 0; do { target = Math.floor(Math.random() * 4); } while (target === cur); text = `Poné ${c.label} en ${target}`; }
+  const dur = Math.max(JUEGO.tiempoMin, JUEGO.tiempoBase + SET.tiempo - G.stage * JUEGO.tiempoBaja);
+  return { id: ++G.seq, c: c.id, kind: c.kind, target, text, until: Date.now() + dur * 1000, dur, x: 0 };
+}
+function syncPlayers(){
+  G.players = playersNow();
+  const ids = new Set(G.players.map(p => p.p));
+  for (const k of Object.keys(G.ins)) if (!ids.has(k)) delete G.ins[k];
+  assignOwn();
+  if (G.phase === 'play') for (const p of G.players) if (!G.ins[p.p]) { G.ins[p.p] = makeOrder(); dirty = true; }
+}
+function assignOwn(){
+  // Si hay varias personas del mismo área y el ajuste es "repartir", cada una recibe una parte de los controles.
+  const own = {};
+  if (SET.reparto === 'repartir'){
+    const byArea = {};
+    for (const p of G.players) (byArea[p.area] = byArea[p.area] || []).push(p.p);
+    for (const [a, ps] of Object.entries(byArea)){
+      if (ps.length < 2) continue;
+      ps.sort();
+      const ctrls = Object.values(CTL).filter(c => c.area === a && activeIn(c, G.stage)).map(c => c.id);
+      ps.forEach((p, j) => {
+        const mine = ctrls.filter((_, i) => i % ps.length === j);
+        let i = j; while (mine.length < Math.min(3, ctrls.length)){ const c = ctrls[i % ctrls.length]; if (!mine.includes(c)) mine.push(c); i++; }
+        own[p] = mine;
+      });
+    }
+  }
+  if (JSON.stringify(own) !== JSON.stringify(G.own)){ G.own = own; dirty = true; }
+}
+function damage(n){
+  G.hull = Math.max(0, G.hull - n);
+  if (G.hull <= 0 && G.phase === 'play'){ G.broken = true; G.phase = 'end'; G.ins = {}; ev('boom', ''); }
+}
+function onAct(m){
+  if (!G || G.phase !== 'play' || !m.data) return;
+  const d = m.data;
+  if (d.type === 'help'){
+    const x = G.ins[d.to];
+    if (G.manos > 0 && x && d.to !== m.peer){ x.until += JUEGO.segundosAyuda * 1000; x.x++; G.manos--; G.stats.help++; ev('help', m.peer, { to: d.to }); }
+    return;
+  }
+  if (d.type === 'fire'){
+    const i = G.fires.findIndex(f => f.id === d.id);
+    if (i >= 0){ G.fires.splice(i, 1); G.stats.out++; ev('out', m.peer, { f: d.id }); }
+    return;
+  }
+  const c = CTL[d.c]; if (!c || !activeIn(c, G.stage)) return;
+  // un mismo toque que llega dos veces (doble toque o reintento por mala conexión) se ignora
+  const dk = m.peer + ':' + c.id + ':' + (d.v === undefined ? '' : d.v), tnow = Date.now();
+  G.dups = G.dups || {};
+  if (G.dups[dk] && tnow - G.dups[dk] < 1200) return;
+  G.dups[dk] = tnow;
+  if (c.kind === 't') G.vals[c.id] = !!d.v;
+  if (c.kind === 'd'){ const v = Number(d.v); if (Number.isInteger(v) && v >= 0 && v <= 3) G.vals[c.id] = v; else return; }
+  let hit = false;
+  for (const [p, x] of Object.entries(G.ins)){
+    if (x.c !== c.id) continue;
+    if (x.kind === 'b' || x.target === G.vals[c.id]){
+      hit = true; G.done++; G.stats.ok++; G.recent[c.id] = Date.now();
+      const n = makeOrder(); n.prev = 'ok'; G.ins[p] = n;
+      if (G.done >= G.need){ clearStage(); break; }
+    }
+  }
+  if (hit) ev('ok', m.peer);
+  else {
+    const pending = Object.values(G.ins).some(x => x.c === c.id) // dial o interruptor a medio camino
+      || (G.recent[c.id] && Date.now() - G.recent[c.id] < 5000);   // la orden se cumplió o venció hace instantes: por demora de red, no cuenta como error
+    if (!pending){
+      G.stats.err++; G.errs++; ev('err', m.peer); damage(JUEGO.danoError);
+      if (G.errs >= JUEGO.erroresPorNave && G.phase === 'play'){
+        G.errs = 0; G.crew = Math.max(0, G.crew - 1); G.losses[G.stage]++; ev('errloss', m.peer);
+        if (G.crew <= 0){ G.phase = 'end'; G.ins = {}; }
+      }
+    }
+  }
+  dirty = true;
+}
+function clearStage(){
+  G.cleared = G.stage; G.ins = {};
+  if (G.stage >= CONFIG.etapas.length - 1){ G.phase = 'end'; return; }
+  G.stage++; G.phase = 'between'; G.until = Date.now() + 6000; G.manos = JUEGO.manosPorEtapa;
+}
+function hostTick(){
+  if (!G) return;
+  const now = Date.now(), dt = (now - lastTick) / 1000; lastTick = now;
+  syncPlayers();
+  if (G.phase === 'between' && now >= G.until){
+    G.phase = 'play'; G.done = 0; G.need = needFor(G.players.length); G.ins = {};
+    syncPlayers(); dirty = true;
+  }
+  if (G.phase === 'play'){
+    for (const [p, x] of Object.entries(G.ins)){
+      if (now > x.until + JUEGO.graciaRed * 1000){
+        G.crew = Math.max(0, G.crew - 1); G.losses[G.stage]++; G.stats.fail++;
+        if (G.fires.length < JUEGO.maxFuegos) G.fires.push({ id: ++G.fireSeq, x: Math.round(12 + Math.random() * 76), y: Math.round(14 + Math.random() * 36) });
+        ev('fail', p); G.recent[x.c] = now;
+        const n = makeOrder(); n.prev = 'fail'; G.ins[p] = n;
+        damage(JUEGO.danoFalla);
+        if (G.crew <= 0 && G.phase === 'play'){ G.phase = 'end'; G.ins = {}; }
+        if (G.phase !== 'play') break;
+      }
+    }
+    if (G.phase === 'play' && G.fires.length){
+      G.burn += dt;
+      if (G.burn >= 2){ G.burn -= 2; damage(JUEGO.danoFuego * G.fires.length); dirty = true; }
+    }
+  }
+  if (dirty || now - lastSend > 1000){
+    dirty = false; lastSend = now;
+    const ins = {};
+    for (const [p, x] of Object.entries(G.ins)) ins[p] = { id: x.id, t: x.text, left: Math.max(0, (x.until - now) / 1000), dur: x.dur, x: x.x, prev: x.prev || '', c: x.c, kind: x.kind, target: x.target };
+    send('st', { code: G.code, phase: G.phase, stage: G.stage, cleared: G.cleared, done: G.done, need: G.need, crew: G.crew, ins, vals: G.vals,
+      losses: G.losses, players: G.players, betweenLeft: Math.max(0, (G.until - now) / 1000), hull: Math.round(G.hull), fires: G.fires,
+      manos: G.manos, ev: G.ev, broken: G.broken, gid: G.gid, stats: G.stats, errs: G.errs, own: G.own, set: SET, nombre: G.nombre, epoch: G.epoch, seq: G.seq, fireSeq: G.fireSeq });
+    if (!solo && room && now - lastBoard > 700){
+      lastBoard = now;
+      room.emit('tablero', { code: G.code, nombre: G.nombre || ('Grupo ' + G.code.toUpperCase()), phase: G.phase, stage: G.stage, cleared: G.cleared, done: G.done, need: G.need,
+        crew: G.crew, hull: Math.round(G.hull), errs: G.errs, manos: G.manos, broken: G.broken, fires: G.fires,
+        players: G.players.map(p => ({ p: p.p, name: p.name, area: p.area, av: p.av })), ev: G.ev.slice(-6),
+        stats: { ok: G.stats.ok, err: G.stats.err, help: G.stats.help, out: G.stats.out } }).catch(() => {});
+    }
+  }
+}
+$('groupName').oninput = () => { if (G){ G.nombre = $('groupName').value.trim().slice(0, 24); dirty = true; } };
+$('launch').onclick = () => {
+  if (!G) return;
+  G = { ...newGame(), players: playersNow(), nombre: G.nombre };
+  G.phase = 'between'; G.stage = 0; G.cleared = -1; G.until = Date.now() + 6000; dirty = true;
+};
+$('again').onclick = () => $('launch').onclick();
+function backToWait(){ if (!G) return; G = { ...newGame(), players: playersNow(), nombre: G.nombre }; dirty = true; }
+$('toWait').onclick = backToWait;
+
+/* ===== Lado de cada jugador ===== */
+let curEpoch = 0, lastStAt = 0;
+const valOf = id => { const l = localVals[id]; return l && Date.now() - l.t < 1500 ? l.v : (S ? S.vals[id] : undefined); };
+let S = null, hostPeer = null, localVals = {}, lastOrderId = 0, lastX = 0, flashT = 0, lastEv = -1, seatKey = '';
+const ends = {}; // fin de la orden de cada jugador (reloj local)
+handlers.st = m => {
+  const d = m.data;
+  if (!d || d.code !== code) return;
+  const ep = d.epoch || 0;
+  if (isHost && G && !m.sameTab){
+    // hay otra persona dirigiendo: gana quien tiene el mando más nuevo (o, si empatan, el identificador más chico)
+    if (ep > G.epoch || (ep === G.epoch && m.peer < myPeer)) stepDown(); else return;
+  }
+  if (ep < curEpoch) return;
+  curEpoch = ep; hostPeer = m.peer; lastStAt = Date.now();
+  const now = Date.now();
+  for (const [p, o] of Object.entries(d.ins || {})) {
+    const k = o.id + ':' + o.x;
+    if (!ends[p] || ends[p].k !== k) ends[p] = { k, end: now + o.left * 1000, dur: o.dur };
+  }
+  const fresh = !S;
+  S = d;
+  trackCrew();
+  render();
+  if (fresh || lastEv < 0) lastEv = (d.ev && d.ev.length) ? d.ev[d.ev.length - 1].i : 0;
+  else for (const e of d.ev || []) if (e.i > lastEv){ lastEv = e.i; playEv(e); }
+};
+const nameOf = p => { const x = S && S.players.find(q => q.p === p); return x ? x.name : 'Alguien'; };
+
+let lastCount = 0;
+function renderWait(){
+  const list = S && S.players && S.players.length ? S.players : playersNow();
+  const n = list.length;
+  $('countN').textContent = n;
+  $('countTxt').textContent = n === 1 ? 'tripulante a bordo' : 'tripulantes a bordo';
+  const slots = $('slots'); slots.innerHTML = '';
+  const total = Math.max(8, n);
+  for (let i = 0; i < total; i++){
+    const p = list[i], el = document.createElement('div');
+    el.className = 'slot' + (p ? '' : ' empty') + (p && i >= lastCount ? ' new' : '');
+    const av = document.createElement('div'); av.className = 'av'; if (p) av.innerHTML = avatarSVG(p.av);
+    const b = document.createElement('b'); b.textContent = p ? p.name + (p.p === myPeer ? ' (vos)' : '') : 'Libre';
+    const sm = document.createElement('small'); sm.textContent = p ? AREA[p.area].nombre : '';
+    el.append(av, b, sm); slots.appendChild(el);
+  }
+  lastCount = n;
+  $('gnWrap').hidden = !isHost || solo;
+  if (isHost && !solo){ $('groupName').placeholder = 'Grupo ' + code.toUpperCase(); }
+  const gn = S && S.nombre ? S.nombre : '';
+  $('gnShow').hidden = isHost || !gn; $('gnShow').textContent = gn ? 'Viajan en la ' + gn : '';
+  $('launch').hidden = !isHost;
+  if (isHost) $('waitMsg').textContent = solo ? 'En modo práctica solo vas a recibir órdenes de tu propia área.' : n < 2 ? 'Esperando a que se sume más gente.' : 'Cuando estén todos, despeguen.';
+  else if (!$('waitMsg').textContent.startsWith('Quien')) $('waitMsg').textContent = 'Esperando a que despeguen.';
+}
+
+function renderSeats(){
+  const key = S.players.map(p => p.p + JSON.stringify(p.av)).join('|');
+  if (key === seatKey) return;
+  seatKey = key;
+  const box = $('seats'); box.innerHTML = '';
+  flightHelpButtons.clear();
+  $('flightHelp').replaceChildren();
+  for (const p of S.players){
+    const s = document.createElement('div'); s.className = 'seat' + (p.p === myPeer ? ' me' : ''); s.dataset.p = p.p;
+    const av = document.createElement('div'); av.className = 'av'; av.innerHTML = avatarSVG(p.av);
+    const b = document.createElement('b'); b.textContent = p.p === myPeer ? 'Vos' : p.name;
+    s.append(av, b);
+    if (p.p !== myPeer){
+      const h = document.createElement('button'); h.type = 'button'; h.className = 'helpme'; h.hidden = true;
+      h.textContent = 'Dale una mano'; h.setAttribute('aria-label', `Darle una mano a ${p.name}`);
+      h.onclick = () => send('act', { type: 'help', to: p.p });
+      s.appendChild(h);
+      flightHelpButtons.set(p.p, { seat: s, button: h, name: p.name });
+    }
+    box.appendChild(s);
+  }
+  placeFlightAlerts();
+}
+function seatEl(p){ return $('seats').querySelector(`[data-p="${CSS.escape(p)}"]`); }
+function fx(p, cls, text, color){
+  const s = seatEl(p); if (!s) return;
+  s.classList.remove('ok', 'err', 'helped'); void s.offsetWidth; s.classList.add(cls);
+  setTimeout(() => s.classList.remove(cls), 900);
+  if (text){ const t = document.createElement('span'); t.className = 'popfx'; t.textContent = text; t.style.color = color || '#fff'; s.appendChild(t); setTimeout(() => t.remove(), 900); }
+}
+let tickT = 0, errT = 0;
+function ticker(text){ $('ticker').textContent = text; tickT = Date.now() + 2600; }
+function playEv(e){
+  if (e.k === 'ok') fx(e.p, 'ok', '✓', '#79FFBA');
+  else if (e.k === 'err'){
+    fx(e.p, 'err', '✗', '#E4572E');
+    if (e.p === myPeer){
+      $('grid').classList.remove('shake'); void $('grid').offsetWidth; $('grid').classList.add('shake');
+      $('errMsg').textContent = `¡Error! Nadie pidió eso (${S.errs || JUEGO.erroresPorNave}/${JUEGO.erroresPorNave})`; $('errMsg').hidden = false; errT = Date.now() + 1400;
+      if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+    }
+  }
+  else if (e.k === 'errloss'){ ticker(`Se acumularon ${JUEGO.erroresPorNave} errores: se alejó una nave.`); }
+  else if (e.k === 'host'){ ticker(`Se cortó la conexión de quien llevaba la partida. Ahora la lleva ${e.p === myPeer ? 'tu celular' : nameOf(e.p)}.`); }
+  else if (e.k === 'fail'){ fx(e.p, 'err', '🔥'); ticker(`¡Se venció una orden de ${e.p === myPeer ? 'vos' : nameOf(e.p)}! Hay fuego en la nave.`); }
+  else if (e.k === 'help'){ fx(e.p, 'ok', '🤝'); fx(e.to, 'helped', `+${JUEGO.segundosAyuda} s`, '#49E3E7'); ticker(`${e.p === myPeer ? 'Le diste' : nameOf(e.p) + ' le dio'} una mano a ${e.to === myPeer ? 'vos' : nameOf(e.to)}.`); }
+  else if (e.k === 'out'){ fx(e.p, 'ok', '🧯'); ticker(`${e.p === myPeer ? 'Apagaste' : nameOf(e.p) + ' apagó'} un fuego.`); }
+}
+const fireArt = `<svg viewBox="0 0 44 44" fill="none" aria-hidden="true">
+  <g class="flame">
+    <path d="M22 43C8 42 4 33 8 24c2-5 6-7 7-12 4 3 4 7 5 8C25 12 23 8 24 2c7 6 11 12 11 20 4-2 4-5 5-7 5 13 1 27-18 28Z" fill="#E4572E"/>
+    <path d="M21 41c-8-1-12-6-11-12 1-4 6-7 6-12 3 4 3 6 5 8 5-4 7-11 6-16 6 7 7 13 6 18 2-1 5-4 6-7 2 12-5 20-18 21Z" fill="#fa943c"/>
+    <path d="M21 41c-8-2-9-7-6-12 2 3 4 2 6 4 5-4 7-8 7-13 4 5 5 10 3 14 2-1 4-2 5-5-1 7-6 12-15 12Z" fill="#F2B33D"/>
+    <path d="M22 41c-4-1-5-3-5-6 3 3 6 3 9-1l2-5c4 6 1 11-6 12Z" fill="#fff0bd"/>
+    <path d="m11 14-1-3m24 2 2-3M21 8l-2-4" stroke="#ffb878" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+</svg>`;
+let fireKey = '';
+function renderFires(){
+  const key = S.fires.map(f => f.id).join(',');
+  if (key === fireKey) return; fireKey = key;
+  const box = $('fires'), ids = new Set(S.fires.map(f => f.id));
+  // Conservá el lugar de los fuegos activos y reservá 44 px para cada toque.
+  const occupied = new Set([...box.children].filter(el => ids.has(+el.dataset.id)).map(el => +el.dataset.slot));
+  for (const el of [...box.children]) if (!ids.has(+el.dataset.id)){ el.classList.add('out'); setTimeout(() => el.remove(), 400); }
+  for (const f of S.fires){
+    if (box.querySelector(`[data-id="${f.id}"]`)) continue;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'fire'; b.dataset.id = f.id;
+    let slot = 0, distance = Infinity;
+    for (let i = 0; i < 12; i++){
+      if (occupied.has(i)) continue;
+      const delta = (12 + (i % 6) * 15.2 - f.x) ** 2 + (22 + Math.floor(i / 6) * 23 - f.y) ** 2;
+      if (delta < distance){ slot = i; distance = delta; }
+    }
+    occupied.add(slot); b.dataset.slot = slot;
+    b.style.left = (12 + (slot % 6) * 15.2) + '%';
+    b.style.top = (22 + Math.floor(slot / 6) * 23) + '%';
+    b.setAttribute('aria-label', 'Apagar fuego');
+    b.innerHTML = fireArt + '<span class="fire-action" aria-hidden="true">Apagá</span>';
+    b.onclick = () => send('act', { type: 'fire', id: f.id });
+    box.appendChild(b);
+  }
+}
+
+function render(){
+  if (!S) return;
+  $('o-between').hidden = S.phase !== 'between';
+  $('o-end').hidden = S.phase !== 'end';
+  if (S.phase === 'lobby'){ document.documentElement.style.setProperty('--dmg', 0); document.body.classList.remove('alarm'); show('s-wait'); renderWait(); return; }
+  if ($('s-play').hidden) show('s-play');
+  const st = CONFIG.etapas[S.stage] || CONFIG.etapas[0];
+  $('stageK').textContent = `Etapa ${S.stage + 1} de ${CONFIG.etapas.length}`;
+  $('stageN').textContent = st.nombre;
+  $('shipsN').textContent = S.crew; $('shipsN').classList.toggle('below', S.crew < APROB);
+  $('shipsMeta').textContent = `de ${META} naves. Aprobás con ${APROB}`;
+  $('errs').textContent = `Errores ${S.errs || 0}/${JUEGO.erroresPorNave}`;
+  $('errs').classList.toggle('hot', (S.errs || 0) >= JUEGO.erroresPorNave - 1);
+  $('progTxt').textContent = S.need ? `Órdenes ${S.done}/${S.need}` : 'Órdenes';
+  $('progFill').style.width = (S.need ? S.done / S.need * 100 : 0) + '%';
+  const hull = S.hull / JUEGO.casco;
+  $('hullTxt').textContent = `Casco ${S.hull}%`;
+  $('hullFill').style.width = (hull * 100) + '%';
+  $('hullFill').style.background = hull < .3 ? '#E4572E' : hull < .6 ? '#F2B33D' : '#49E3E7';
+  document.documentElement.style.setProperty('--dmg', (1 - hull).toFixed(2));
+  document.body.classList.toggle('alarm', S.phase === 'play' && hull < .3);
+  $('hands').textContent = '🤝 ' + S.manos;
+  $('hands').setAttribute('aria-label', `${S.manos} manos disponibles para ayudar`);
+  renderSeats(); renderFires();
+
+  const o = S.ins && S.ins[myPeer];
+  if (o){
+    if (o.id !== lastOrderId){
+      if (lastOrderId && o.prev){
+        $('order').className = 'order ' + o.prev; flashT = Date.now() + 600;
+        if (o.prev === 'fail' && navigator.vibrate) navigator.vibrate(200);
+      }
+      lastOrderId = o.id;
+      renderOrderText(o.t);
+    }
+    if (o.x !== lastX && o.x > 0){ lastX = o.x; } 
+  } else $('orderTxt').textContent = S.phase === 'play' ? 'Esperando orden…' : '';
+
+  const same = S.players.filter(p => p.area === profile.area).length, own = S.own && S.own[myPeer];
+  $('myArea').textContent = AREA[profile.area].nombre + (same > 1 ? (own ? ` (repartido entre ${same})` : ` (lo comparten ${same})`) : '');
+  const grid = $('grid');
+  if (grid.dataset.key !== profile.area + '-' + S.stage + '-' + (own ? own.join(',') : '')) buildPanel();
+  for (const el of grid.querySelectorAll('[data-c]')){
+    const c = CTL[el.dataset.c], v = valOf(c.id);
+    if (c.kind === 't') el.setAttribute('aria-pressed', !!v);
+    if (c.kind === 'd') el.querySelectorAll('.seg button').forEach((b, i) => b.setAttribute('aria-pressed', (v || 0) === i));
+  }
+
+  if (S.phase === 'between'){
+    const prevI = S.cleared, next = CONFIG.etapas[S.stage];
+    $('bK').textContent = prevI >= 0 ? `Etapa ${prevI + 1} superada` : 'Preparando el despegue';
+    $('bTitle').textContent = prevI >= 0 ? CONFIG.etapas[prevI].nombre : 'Odisea 1A 2027';
+    $('bText').textContent = prevI >= 0
+      ? (S.losses[prevI] ? `En esta etapa se ${S.losses[prevI] === 1 ? 'alejó 1 nave' : `alejaron ${S.losses[prevI]} naves`}. Quedan ${S.crew} de ${CONFIG.naves}. El casco está al ${S.hull}%.` : `No se perdió ninguna nave. Quedan ${S.crew} de ${CONFIG.naves}. El casco está al ${S.hull}%.`)
+      : `Somos ${S.players.length} a bordo. La meta: que lleguen las ${META} naves. Con ${APROB} (${APROB_PCT}%) aprueban. Y que no se rompa la nave.`;
+    $('bNext').textContent = `Próxima etapa: ${next.nombre}. ${next.texto} Mirá tu panel: cambia según la etapa. Tienen ${JUEGO.manosPorEtapa} manos para ayudarse.`;
+  }
+  if (S.phase === 'end') renderEnd();
+}
+
+function renderOrderText(text){
+  const output = $('orderTxt');
+  const parts = /^(Presioná|Encendé|Apagá|Poné) (.+)$/.exec(text);
+  if (!parts){ output.textContent = text; return; }
+  const verb = document.createElement('span');
+  verb.className = 'order-verb';
+  verb.textContent = parts[1];
+  output.replaceChildren(verb, ' ' + parts[2]);
+}
+
+function buildPanel(){
+  const own = S.own && S.own[myPeer];
+  const grid = $('grid'); grid.dataset.key = profile.area + '-' + S.stage + '-' + (own ? own.join(',') : ''); grid.innerHTML = '';
+  for (const c of Object.values(CTL).filter(c => own ? own.includes(c.id) : (c.area === profile.area && activeIn(c, S.stage)))){
+    let el;
+    if (c.kind === 'b'){
+      el = document.createElement('button'); el.type = 'button'; el.className = 'ctl btn';
+      el.innerHTML = '<span class="lb"></span><span class="pad"></span>';
+      el.onclick = () => { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 120); send('act', { c: c.id }); };
+    } else if (c.kind === 't'){
+      el = document.createElement('button'); el.type = 'button'; el.className = 'ctl tg'; el.setAttribute('aria-pressed', 'false');
+      el.innerHTML = '<span class="lb"></span><span class="switch-bank" aria-hidden="true"><span class="sw2"></span><span class="switch-off">Apagado</span><span class="switch-on">Encendido</span></span>';
+      el.onclick = () => { const cur = !!valOf(c.id); localVals[c.id] = { v: !cur, t: Date.now() }; el.setAttribute('aria-pressed', !cur); send('act', { c: c.id, v: !cur }); };
+    } else {
+      el = document.createElement('div'); el.className = 'ctl dial'; el.setAttribute('role', 'group');
+      el.innerHTML = '<span class="lb"></span><div class="seg">' + [0, 1, 2, 3].map(n => `<button type="button" aria-pressed="false">${n}</button>`).join('') + '</div>';
+      el.querySelectorAll('.seg button').forEach((b, n) => b.onclick = () => {
+        localVals[c.id] = { v: n, t: Date.now() }; el.querySelectorAll('.seg button').forEach((x, i) => x.setAttribute('aria-pressed', i === n));
+        send('act', { c: c.id, v: n });
+      });
+    }
+    el.dataset.c = c.id;
+    el.querySelector('.lb').textContent = c.label;
+    if (c.kind === 'd') el.setAttribute('aria-label', c.label);
+    grid.appendChild(el);
+  }
+  labelFlightKeys();
+}
+
+function renderEnd(){
+  const pct = Math.round(S.crew / CONFIG.naves * 100), ok = S.crew >= APROB, all = S.cleared >= CONFIG.etapas.length - 1;
+  $('eBroken').hidden = !S.broken;
+  $('eTitle').textContent = S.broken ? 'La nave se rompió' : !all ? 'La flota no llegó al final del viaje' : S.crew >= META ? '¡Misión perfecta: llegaron todas!' : ok ? 'Aprobaron' : `No alcanzó: faltaron ${APROB - S.crew} para aprobar`;
+  $('ePct').textContent = pct + '%'; $('ePct').className = 'big' + (ok && !S.broken ? '' : ' bad');
+  $('eSub').textContent = S.broken
+    ? `Se acumularon demasiadas órdenes vencidas, errores y fuegos sin apagar. Sin la nave de Academia, la flota quedó a la deriva en la etapa ${S.stage + 1}.`
+    : `${S.crew} de ${META} naves llegaron. Se aprueba con ${APROB} (${APROB_PCT}%, ${CONFIG.mejoraObjetivo} puntos más que hoy) y la meta es que lleguen las ${META}.`;
+  $('eFill').style.width = pct + '%'; $('eBase').style.left = CONFIG.permanenciaBase + '%'; $('eGoal').style.left = APROB_PCT + '%'; $('eMeta').style.left = 'calc(100% - 2px)';
+  const s = S.stats;
+  $('eTeam').textContent = `Como equipo: ${s.ok} órdenes cumplidas, ${s.help} ${s.help === 1 ? 'mano dada' : 'manos dadas'}, ${s.out} ${s.out === 1 ? 'fuego apagado' : 'fuegos apagados'} y ${s.err} ${s.err === 1 ? 'error' : 'errores'}.`;
+  awardPoints();
+  $('eLosses').innerHTML = '';
+  CONFIG.etapas.forEach((e, i) => {
+    const li = document.createElement('li'); const a = document.createElement('span'); a.textContent = e.nombre;
+    const b = document.createElement('b'); b.textContent = S.losses[i] || 0; li.append(a, b); $('eLosses').appendChild(li);
+  });
+  $('again').hidden = !isHost; $('toWait').hidden = !isHost;
+  $('eWait').textContent = isHost ? '' : 'Quien creó la partida puede empezar otra.';
+}
+
+/* ===== Animación de la cabina y temporizadores ===== */
+const warp = $('warp'), wctx = warp.getContext('2d');
+const cabinMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+const cabinFrames = new WeakMap();
+const hazardSprites = new Map();
+const hullSprites = new Map();
+const circle = Math.PI * 2;
+const spaceColors = {
+  station: '91,163,217', belt: '133,149,189', hole: '181,88,52', storm: '132,113,206',
+  rocks: '155,115,92', nebula: '97,76,193', ringed: '58,154,185', gate: '45,136,231'
+};
+
+function spaceRandom(seed){
+  let n = seed;
+  return () => { n = (Math.imul(n, 1664525) + 1013904223) | 0; return (n >>> 0) / 4294967296; };
+}
+
+function sceneTexture(w, h){
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  return canvas;
+}
+
+function spacePath(c, points, fill, stroke){
+  c.beginPath(); c.moveTo(points[0][0], points[0][1]);
+  for (const [x, y] of points.slice(1)) c.lineTo(x, y);
+  c.closePath();
+  if (fill){ c.fillStyle = fill; c.fill(); }
+  if (stroke){ c.strokeStyle = stroke; c.stroke(); }
+}
+
+function spaceEllipse(c, x, y, rx, ry, rotation, fill){
+  c.fillStyle = fill; c.beginPath(); c.ellipse(x, y, rx, ry, rotation, 0, circle); c.fill();
+}
+
+function spaceGlow(c, x, y, r, rgb, opacity){
+  const glow = c.createRadialGradient(x, y, 0, x, y, r);
+  glow.addColorStop(0, `rgba(${rgb},${opacity})`);
+  glow.addColorStop(.42, `rgba(${rgb},${opacity * .34})`);
+  glow.addColorStop(1, `rgba(${rgb},0)`);
+  c.fillStyle = glow; c.fillRect(x - r, y - r, r * 2, r * 2);
+}
+
+function drawOrbitalField(c, w, h, firstPerson){
+  const x = w * (firstPerson ? .54 : .74), y = h * (firstPerson ? .54 : .374);
+  const r = Math.min(w * .27, h * .62);
+  c.fillStyle = '#283850';
+  c.beginPath(); c.arc(x, y, r * .63, 0, circle); c.fill();
+  c.strokeStyle = 'rgba(141,159,199,.45)'; c.lineWidth = 1;
+  c.beginPath(); c.ellipse(x, y, r * 1.18, r * .26, -.38, 0, circle); c.stroke();
+  c.strokeStyle = 'rgba(155,232,242,.28)';
+  c.beginPath(); c.arc(x, y, r * .72, -1.27, 1.19); c.stroke();
+}
+
+function drawStarfield(canvas, kind, w, h, editorial = false, firstPerson = false){
+  const c = canvas.getContext('2d'), rng = spaceRandom(1717);
+  c.setTransform(canvas.width / w, 0, 0, canvas.height / h, 0, 0);
+  const base = c.createLinearGradient(0, 0, w * .6, h);
+  base.addColorStop(0, editorial ? '#101727' : '#030610');
+  base.addColorStop(.55, editorial ? '#192841' : '#091429');
+  base.addColorStop(1, editorial ? '#101727' : '#030610');
+  c.fillStyle = base; c.fillRect(0, 0, w, h);
+  const rgb = spaceColors[kind] || spaceColors.station;
+  spaceGlow(c, w * .72, h * .28, w * .56, rgb, .15);
+  spaceGlow(c, w * .26, h * .52, w * .46, '35,92,163', .12);
+  for (let i = 0; i < (editorial ? 96 : 290); i++){
+    const x = rng() * w, y = h * (.61 - x / w * .33 + (rng() + rng() - 1) * .6);
+    const a = .02 + rng() * .15;
+    c.fillStyle = i % 3 ? `rgba(176,206,248,${a})` : `rgba(${rgb},${a})`;
+    c.fillRect(x, y, rng() * 1.5 + .35, .8);
+  }
+  for (let i = 0; i < (editorial ? 72 : 146); i++){
+    const x = rng() * w, y = rng() * h, a = rng() * .74 + .14, s = a > .8 ? 1.25 : .75;
+    c.fillStyle = i % 7 === 0 ? `rgba(255,215,179,${a})` : `rgba(204,226,255,${a})`;
+    c.fillRect(x, y, s, s);
+    if (a > .83 && i % 2 === 0){
+      spaceGlow(c, x, y, 4, '159,206,255', .36);
+      c.fillStyle = 'rgba(200,224,255,.5)'; c.fillRect(x - 2.5, y + .2, 5, .55);
+    }
+  }
+  const vignette = c.createLinearGradient(0, 0, 0, h);
+  vignette.addColorStop(0, 'rgba(2,5,12,.66)'); vignette.addColorStop(.24, 'rgba(2,5,12,0)');
+  vignette.addColorStop(.68, 'rgba(2,5,12,.12)'); vignette.addColorStop(1, '#02050c');
+  c.fillStyle = vignette; c.fillRect(0, 0, w, h);
+  if (editorial) drawOrbitalField(c, w, h, firstPerson);
+}
+
+function prepareCabinFrame(canvas, c, now, st, mini, firstPerson = false){
+  if (!c) return null;
+  let frame = cabinFrames.get(canvas);
+  if (!frame){ frame = { last: -Infinity }; cabinFrames.set(canvas, frame); }
+  const reduced = !!cabinMotion?.matches, interval = reduced ? 120 : mini ? 39 : 30;
+  if (now - frame.last < interval) return null;
+  frame.last = now;
+  const size = canvas.getBoundingClientRect(), w = size.width, h = size.height;
+  if (!w || !h) return null;
+  const dpr = Math.min(devicePixelRatio || 1, mini ? 1.25 : 1.5);
+  const pxW = Math.max(1, Math.round(w * dpr)), pxH = Math.max(1, Math.round(h * dpr));
+  const kind = ESCENAS[st?.stage] || 'station';
+  const resized = canvas.width !== pxW || canvas.height !== pxH;
+  if (resized){ canvas.width = pxW; canvas.height = pxH; }
+  if (!frame.background || resized || frame.kind !== kind || frame.firstPerson !== firstPerson){
+    frame.background = sceneTexture(Math.min(640, pxW), Math.min(400, pxH));
+    drawStarfield(frame.background, kind, w, h, !mini, firstPerson);
+    frame.kind = kind; frame.firstPerson = firstPerson;
+  }
+  const signature = `${st?.stage}/${st?.phase}/${st?.crew}/${st?.done}/${st?.need}/${firstPerson}`;
+  if (reduced && frame.reduced && !resized && frame.signature === signature) return null;
+  frame.signature = signature; frame.reduced = reduced;
+  c.setTransform(pxW / w, 0, 0, pxH / h, 0, 0);
+  c.drawImage(frame.background, 0, 0, w, h);
+  if (!reduced && firstPerson) drawFlightStreaks(c, w, h, now);
+  if (!reduced && !firstPerson){
+    c.strokeStyle = 'rgba(178,216,250,.32)'; c.lineWidth = .65; c.beginPath();
+    for (let i = 0; i < 16; i++){
+      const z = ((now * .00014 + i * .271) % 1) ** 2;
+      const angle = i * 2.4, dx = Math.cos(angle) * w * .88, dy = Math.sin(angle) * h * .67;
+      const x = w * .72 + dx * z, y = h * .34 + dy * z;
+      c.moveTo(x, y); c.lineTo(x - dx * .016 * z, y - dy * .016 * z);
+    }
+    c.stroke();
+  }
+  return { w, h };
+}
+
+function drawWarp(now){
+  const frame = prepareCabinFrame(warp, wctx, now, S, false, flightCabin);
+  if (frame) drawScene(frame.w, frame.h, now, flightCabin);
+}
+
+/* ===== Simulación de la flota en la ventana de la cabina ===== */
+const fleet = Array.from({ length: CONFIG.naves }, (_, i) => ({ col: i % 10, row: Math.floor(i / 10), ph: i * 2.4 }));
+const myAnim = { prevCrew: null, lost: [] };
+function trackCrewFor(anim, st){
+  if (anim.prevCrew === null || st.crew > anim.prevCrew){ anim.prevCrew = st.crew; anim.lost = []; return; }
+  const now = performance.now();
+  while (anim.prevCrew > st.crew){ anim.prevCrew--; anim.lost.push({ i: anim.prevCrew, t0: now + anim.lost.length * 120 }); }
+}
+function trackCrew(){ if (S) trackCrewFor(myAnim, S); }
+
+function shipShape(c, x, y, s, lost = false){
+  if (!hullSprites.has(lost)){
+    const sprite = sceneTexture(80, 50), g = sprite.getContext('2d');
+    g.setTransform(21, 0, 0, 21, 41, 25);
+    const rgb = lost ? '255,148,49' : '73,227,231';
+    spaceGlow(g, -.97, 0, .73, rgb, .69);
+    const wake = g.createLinearGradient(-1.8, 0, -.5, 0);
+    wake.addColorStop(0, `rgba(${rgb},0)`); wake.addColorStop(1, `rgba(${rgb},.79)`);
+    spacePath(g, [[-1.83,.04],[-.62,-.2],[-.62,.2]], wake);
+    spacePath(g, [[1.39,.02],[.23,.21],[-.75,.52],[-.85,.36],[-.6,.08],[-.75,-.33],[-.83,-.49],[.25,-.25]], '#26394c');
+    spacePath(g, [[.65,-.09],[-.2,-.48],[-.95,-.61],[-.7,-.24],[-.25,-.04]], '#a1b9c8');
+    spacePath(g, [[.38,.06],[-.6,.22],[-.88,.57],[-.1,.4],[.66,.13]], '#58728a');
+    const alloy = g.createLinearGradient(0, -.47, 0, .34);
+    alloy.addColorStop(0, '#edf7ff'); alloy.addColorStop(.42, '#a5bfce'); alloy.addColorStop(.65, '#5a7e94'); alloy.addColorStop(1, '#263b51');
+    spacePath(g, [[1.39,-.02],[.43,.2],[-.5,.17],[-.78,.04],[-.68,-.19],[-.24,-.24],[.37,-.21]], alloy);
+    spacePath(g, [[.77,-.05],[.13,.04],[-.3,.02],[-.25,-.12],[.31,-.13]], '#0d3146');
+    spacePath(g, [[.39,-.09],[.05,-.05],[-.22,-.06]], lost ? '#F2B33D' : '#a7f8f7');
+    g.fillStyle = lost ? '#ffd599' : '#79FFBA';
+    g.fillRect(-.99,-.57,.16,.12); g.fillRect(-.91,.39,.15,.12); g.fillRect(-.77,-.11,.1,.18);
+    hullSprites.set(lost, sprite);
+  }
+  c.drawImage(hullSprites.get(lost), x - s * 1.96, y - s * 1.19, s * 3.81, s * 2.38);
+}
+
+function asteroid(c, x, y, r, seed, light){
+  const rng = spaceRandom(seed), outline = [];
+  c.save(); c.translate(x, y); c.rotate(rng() * 4); c.scale(r, r * (.65 + rng() * .26));
+  for (let i = 0; i < 10; i++){
+    const a = i * circle / 10, d = .66 + rng() * .34;
+    outline.push([Math.cos(a) * d, Math.sin(a) * d]);
+  }
+  const tones = light ? ['#c1ab98', '#786d6b', '#31313c'] : ['#8b9aa5', '#566375', '#222839'];
+  const mineral = c.createLinearGradient(-.61, -.76, .57, .68);
+  mineral.addColorStop(0, tones[0]); mineral.addColorStop(.38, tones[1]); mineral.addColorStop(1, tones[2]);
+  spacePath(c, outline, mineral); c.clip();
+  for (let i = 0; i < 10; i++){
+    const p = outline[i], q = outline[(i + 1) % outline.length];
+    spacePath(c, [p, q, [(rng() - .5) * .9, (rng() - .5) * .84]], i % 2 ? 'rgba(223,231,239,.11)' : 'rgba(7,11,22,.22)');
+  }
+  for (let i = 0; i < 9; i++){
+    const px = rng() * 1.3 - .65, py = rng() * 1.15 - .58, d = .02 + rng() ** 2 * .15;
+    spaceEllipse(c, px, py + .012, d, d * .6, .1, 'rgba(231,216,192,.17)');
+    spaceEllipse(c, px, py, d * .88, d * .54, .1, 'rgba(11,17,26,.46)');
+  }
+  c.restore();
+}
+
+function stationStructure(c, gate){
+  c.save(); c.rotate(gate ? -.24 : -.4); c.scale(1, gate ? .88 : .71);
+  const metal = c.createLinearGradient(-.62, -.84, .63, .69);
+  metal.addColorStop(0, '#b8cbd5'); metal.addColorStop(.25, '#435b72'); metal.addColorStop(.5, '#253749');
+  metal.addColorStop(.77, '#7899aa'); metal.addColorStop(1, '#172b40');
+  const r = gate ? .94 : .84;
+  if (gate){
+    spaceGlow(c, 0, 0, 1.36, '24,130,255', .83);
+    const iris = c.createRadialGradient(-.13, -.1, 0, 0, 0, .84);
+    iris.addColorStop(0, '#070d37'); iris.addColorStop(.52, '#132d6d'); iris.addColorStop(.84, '#2774cc'); iris.addColorStop(1, '#9beefa');
+    spaceEllipse(c, 0, 0, .85, .85, 0, iris);
+    for (let i = 0; i < 10; i++){
+      c.strokeStyle = `rgba(130,226,250,${.10 + i * .032})`; c.lineWidth = .011;
+      c.beginPath(); c.ellipse(-.08, -.01, .19 + i * .069, .11 + i * .072, -.4, i * .72, i * .72 + 2.1); c.stroke();
+    }
+  } else {
+    c.lineWidth = .055;
+    for (let i = 0; i < 8; i++){
+      c.save(); c.rotate(i * circle / 8 + .15);
+      spacePath(c, [[.11,-.04],[.84,-.075],[.87,.04],[.11,.063]], metal, '#243747');
+      c.fillStyle = '#19344f'; c.fillRect(.44, -.035, .32, .064);
+      c.fillStyle = '#6d9db3'; c.fillRect(.45, -.022, .29, .013);
+      c.restore();
+    }
+  }
+  c.lineWidth = .19; c.strokeStyle = '#101e30'; c.beginPath(); c.arc(.055, .109, r, 0, circle); c.stroke();
+  c.strokeStyle = metal; c.beginPath(); c.arc(0, 0, r, 0, circle); c.stroke();
+  c.strokeStyle = gate ? '#a5f2ff' : '#abc7d5'; c.lineWidth = .022;
+  c.beginPath(); c.arc(0, 0, r - .078, 0, circle); c.stroke();
+  for (let i = 0; i < 16; i++){
+    c.save(); c.rotate(i * circle / 16);
+    c.lineWidth = .009;
+    spacePath(c, [[r-.074,-.069],[r+.055,-.076],[r+.089,-.03],[r+.085,.055],[r-.052,.07]], i % 2 ? '#314960' : metal, '#152738');
+    c.fillStyle = i % 4 === 0 ? '#F2B33D' : '#9ae9f5'; c.fillRect(r - .03, -.031, .071, .015);
+    c.fillStyle = '#172a3f'; c.fillRect(r - .021, .005, .052, .022);
+    c.restore();
+  }
+  if (gate){
+    for (const side of [-1, 1]){
+      c.save(); c.rotate(side * .92);
+      spacePath(c, [[.96,-.15],[1.22,-.11],[1.38,-.055],[1.38,.055],[1.16,.12],[.98,.16]], metal);
+      c.fillStyle = '#9df4f8'; c.fillRect(1.20, -.034, .11, .02); c.restore();
+    }
+  } else {
+    spacePath(c, [[-1.37,.028],[-.63,-.082],[.74,-.06],[1.36,.04],[1.36,.143],[.63,.13],[-.72,.16],[-1.36,.118]], metal);
+    for (const side of [-1, 1]){
+      c.save(); c.scale(side, 1);
+      c.fillStyle = '#5c788c'; c.fillRect(.97, -.2, .37, .4);
+      for (let column = 0; column < 4; column++){
+        for (let row = 0; row < 5; row++){
+          c.fillStyle = (column + row) % 2 ? '#213b65' : '#28466b';
+          c.fillRect(.994 + column * .081, -.177 + row * .073, .072, .06);
+        }
+      }
+      c.restore();
+    }
+    spaceEllipse(c, 0, 0, .286, .214, 0, '#203447'); spaceEllipse(c, -.04, -.04, .23, .17, 0, metal);
+    spaceEllipse(c, -.075, -.059, .118, .075, 0, '#153a56'); spaceEllipse(c, -.087, -.089, .06, .015, 0, '#b9f0f4');
+  }
+  c.restore();
+}
+
+function orbitRing(c, radius, height, start, end, color, width){
+  c.strokeStyle = color; c.lineWidth = width;
+  c.beginPath(); c.ellipse(0, 0, radius, height, 0, start, end); c.stroke();
+}
+
+function ringedWorld(c, hole){
+  const colors = hole ? ['#712e39', '#db663e', '#fac181', '#fff1ba'] : ['#426785', '#7f99ab', '#b4c2c4', '#d0c6ae'];
+  const rng = spaceRandom(hole ? 373 : 127);
+  const bands = Array.from({ length: 20 }, (_, i) => ({ r: .76 + i * .036, h: .16 + i * .012, color: colors[Math.floor(rng() * colors.length)], a: .2 + rng() * .57 }));
+  c.save(); c.rotate(hole ? -.39 : -.49);
+  for (const b of bands){ c.globalAlpha = b.a; orbitRing(c, b.r, b.h, Math.PI, circle, b.color, hole ? .051 : .022); }
+  c.globalAlpha = 1; c.restore();
+  if (hole){
+    const lens = c.createRadialGradient(-.03, 0, .4, 0, 0, .97);
+    lens.addColorStop(.19, '#05040b'); lens.addColorStop(.35, '#ffe2a3'); lens.addColorStop(.43, '#c56d42');
+    lens.addColorStop(.54, 'rgba(184,69,51,.42)'); lens.addColorStop(1, 'rgba(172,63,60,0)');
+    spaceEllipse(c, 0, -.07, .97, .97, 0, lens);
+    spaceEllipse(c, 0, 0, .548, .548, 0, '#010207');
+    c.save(); c.rotate(-.17); orbitRing(c, .57, .57, 3.24, 5.84, '#ffe3ab', .016); c.restore();
+  } else {
+    const r = .73;
+    const gas = c.createRadialGradient(-.34, -.38, .02, .06, .08, .91);
+    gas.addColorStop(0, '#b5e3e0'); gas.addColorStop(.34, '#609fad'); gas.addColorStop(.66, '#274f6d'); gas.addColorStop(1, '#0b1629');
+    c.save(); spaceEllipse(c, 0, 0, r, r, 0, gas); c.clip();
+    c.rotate(-.37);
+    for (let i = 0; i < 27; i++){
+      const y = -.69 + i * .054;
+      c.strokeStyle = i % 3 ? `rgba(134,211,221,${rng() * .24})` : 'rgba(226,204,182,.33)';
+      c.lineWidth = .012 + rng() * .04;
+      c.beginPath(); c.moveTo(-.81, y); c.quadraticCurveTo(-.06, y + .22 - Math.abs(y) * .24, .81, y - .045); c.stroke();
+    }
+    c.restore();
+    const night = c.createLinearGradient(-.48, -.56, .48, .56);
+    night.addColorStop(.28, 'rgba(4,9,20,0)'); night.addColorStop(1, 'rgba(4,9,20,.86)');
+    spaceEllipse(c, 0, 0, r, r, 0, night);
+  }
+  c.save(); c.rotate(hole ? -.39 : -.49);
+  for (const b of bands){ c.globalAlpha = b.a; orbitRing(c, b.r, b.h, 0, Math.PI, b.color, hole ? .05 : .025); }
+  c.globalAlpha = 1; c.restore();
+}
+
+function floatingSheet(c, x, y, size, angle){
+  c.save(); c.translate(x, y); c.rotate(angle); c.scale(size, size);
+  spacePath(c, [[-.53,-.73],[.43,-.69],[.52,.46],[.21,.75],[-.6,.67]], '#c3d2de');
+  spacePath(c, [[.21,.75],[.22,.43],[.52,.46]], '#718aa0');
+  c.fillStyle = '#55718b'; c.fillRect(-.39,-.46,.62,.078); c.fillRect(-.39,-.23,.54,.063); c.fillRect(-.39,-.04,.64,.063);
+  c.restore();
+}
+
+function gasCloud(c, storm){
+  const rng = spaceRandom(storm ? 920 : 835);
+  const colors = storm ? ['94,99,179', '66,95,169', '131,119,200'] : ['170,77,151', '57,117,233', '88,218,214'];
+  for (let i = 0; i < 68; i++){
+    const x = (rng() - .5) * 2.38, y = Math.sin(x * 2.1) * -.31 + (rng() - .5) * .62;
+    const size = .12 + rng() * .47;
+    spaceGlow(c, x, y, size, colors[i % 3], .14 + rng() * .29);
+  }
+  for (let i = 0; i < 74; i++){
+    const x = (rng() - .5) * 2.67, y = (rng() - .5) * 1.48;
+    c.fillStyle = `rgba(216,237,255,${rng() * .51 + .08})`; c.fillRect(x, y, .012, .012);
+  }
+  if (storm){
+    const bolts = [[[-.98,.19],[-.56,.08],[-.39,.17],[-.04,-.15],[.16,-.13],[.46,-.44]],
+      [[.15,.49],[.36,.27],[.48,.32],[.68,.06],[1.02,-.08]], [[-.39,.17],[-.29,.34],[-.08,.4]]];
+    for (const points of bolts){
+      c.beginPath(); c.moveTo(...points[0]); for (const p of points.slice(1)) c.lineTo(...p);
+      c.strokeStyle = 'rgba(153,173,255,.46)'; c.lineWidth = .063; c.stroke();
+      c.strokeStyle = '#d6e4ff'; c.lineWidth = .014; c.stroke();
+    }
+    floatingSheet(c, -.75, -.45, .18, -.66); floatingSheet(c, .38, .49, .235, .45); floatingSheet(c, 1.01, -.36, .145, 1.03);
+  }
+}
+
+function asteroidField(c, belt){
+  const rng = spaceRandom(belt ? 172 : 802);
+  if (belt){
+    const planet = c.createRadialGradient(-.24, -.21, .02, 0, 0, .49);
+    planet.addColorStop(0, '#748b9f'); planet.addColorStop(.52, '#31465f'); planet.addColorStop(1, '#131d2f');
+    spaceEllipse(c, 0, 0, .45, .45, 0, planet);
+    for (let i = 0; i < 52; i++){
+      const x = (rng() - .5) * 2.95, y = x * -.28 + (rng() - .5) * .6;
+      asteroid(c, x, y, .021 + rng() ** 2 * .105, i * 1e4 + 67, i % 5 === 0);
+    }
+  } else {
+    for (let i = 0; i < 27; i++){
+      const x = (rng() - .5) * 2.9, y = (rng() - .5) * 1.59;
+      asteroid(c, x, y, .022 + rng() * .072, i * 1e4 + 31, true);
+    }
+    asteroid(c, -.74, -.28, .3, 498314, true); asteroid(c, .86, -.39, .28, 78231, false);
+    asteroid(c, .15, .3, .57, 83921, true); asteroid(c, -.99, .62, .19, 582951, false);
+    asteroid(c, 1.06, .48, .22, 79123, true);
+  }
+}
+
+function drawHazard(c, kind, x, y, r, t){
+  if (!hazardSprites.has(kind)){
+    const sprite = sceneTexture(384, 276), g = sprite.getContext('2d');
+    g.setTransform(111, 0, 0, 111, 192, 138);
+    const tone = spaceColors[kind] || spaceColors.station;
+    spaceGlow(g, 0, 0, 1.35, tone, .26);
+    if (kind === 'station' || kind === 'gate') stationStructure(g, kind === 'gate');
+    if (kind === 'belt' || kind === 'rocks') asteroidField(g, kind === 'belt');
+    if (kind === 'hole' || kind === 'ringed') ringedWorld(g, kind === 'hole');
+    if (kind === 'storm' || kind === 'nebula') gasCloud(g, kind === 'storm');
+    hazardSprites.set(kind, sprite);
+  }
+  const sway = Math.sin(t * .79);
+  c.save();
+  c.translate(x + sway * r * .021, y + Math.sin(t * .61) * r * .025);
+  c.rotate(kind === 'station' ? t * .16 : sway * (kind === 'gate' ? .065 : .027));
+  c.drawImage(hazardSprites.get(kind), -r * 1.73, -r * 1.24, r * 3.46, r * 2.48);
+  c.restore();
+}
+
+function drawSceneOn(c, w, h, now, st, anim, firstPerson = false){
+  const reduced = !!cabinMotion?.matches, t = reduced ? 0 : now / 1000;
+  const prog = st.phase === 'play' && st.need ? st.done / st.need : st.phase === 'between' ? 0 : 1;
+  const hx = w * (firstPerson ? .54 : .74), hy = h * (firstPerson ? .54 : .374);
+  const r = firstPerson ? Math.min(w * .19, h * .39) * flightApproach(anim, st.stage, prog, now, reduced)
+    : Math.min(w * .157, h * .3) * (.89 + prog * .16);
+  drawHazard(c, ESCENAS[st.stage] || 'station', hx, hy, r, t);
+  const s = Math.max(2.8, Math.min(8.4, w * .0126, h * .031));
+  const slot = i => {
+    const f = fleet[i], movement = reduced ? 0 : 1.2;
+    return { x: w * ((firstPerson ? .17 : .116) + f.col * (firstPerson ? .025 : .042) + f.row * .017) + Math.sin(t * 1.27 + f.ph) * movement,
+      y: h * ((firstPerson ? .53 : .238) + f.row * (firstPerson ? .071 : .103) - f.col * .0042) + Math.cos(t * .96 + f.ph) * movement };
+  };
+  for (let i = 0; i < Math.min(st.crew, CONFIG.naves); i++){
+    const p = slot(i);
+    shipShape(c, p.x, p.y, s * (.78 + fleet[i].row * .086));
+  }
+  if (!anim.lost.length) return;
+  anim.lost = anim.lost.filter(a => !reduced && now - a.t0 < 1800);
+  for (const a of anim.lost){
+    const k = Math.max(0, (now - a.t0) / 1800), e = k * k, p = slot(a.i);
+    c.save(); c.translate(p.x + (hx - p.x) * e, p.y + (hy - p.y) * e);
+    c.rotate(k * 3.75); c.globalAlpha = 1 - k * .8;
+    shipShape(c, 0, 0, s * (1 - k * .76), true); c.restore();
+  }
+}
+function drawScene(w, h, now, firstPerson){ if (!S || S.phase === 'lobby') return; drawSceneOn(wctx, w, h, now, S, myAnim, firstPerson); }
+
+function loop(now){
+  if (!$('s-play').hidden) drawWarp(now);
+  if (live.on) liveTick(now);
+  const t = Date.now();
+  const mine = S && S.ins && S.ins[myPeer] && ends[myPeer];
+  const timerText = $('timerTxt');
+  if (mine && S.phase === 'play'){
+    const left = Math.max(0, mine.end - t);
+    $('timer').style.width = Math.min(100, left / (mine.dur * 1000) * 100) + '%';
+    $('timer').style.background = left < 3000 ? '#F2B33D' : '#79FFBA';
+    const seconds = Math.ceil(left / 1000) + ' s';
+    if (timerText.textContent !== seconds) timerText.textContent = seconds;
+  } else {
+    $('timer').style.width = '0';
+    if (timerText.textContent) timerText.textContent = '';
+  }
+  updateFlightHelp(t);
+  if (flashT && t > flashT){ $('order').className = 'order'; flashT = 0; }
+  if (tickT && t > tickT){ $('ticker').textContent = ''; tickT = 0; }
+  if (!isHost && !solo && nr && S && S.phase !== 'end' && lastStAt && t - lastStAt > 3000 && !tickT) $('ticker').textContent = 'Reconectando con la nave…';
+  else if (!tickT && $('ticker').textContent === 'Reconectando con la nave…') $('ticker').textContent = '';
+  if (errT && t > errT){ $('errMsg').hidden = true; errT = 0; }
+  requestAnimationFrame(loop);
+}
+/* ===== Configuración ===== */
+function leaveGame(){
+  if (isHost && !solo && room && G && playersNow().length <= 1) room.emit('tablero', { code: G.code, phase: 'closed' }).catch(() => {});
+  if (nr){ nr.leave().catch(() => {}); nr = null; }
+  clearInterval(hostTimer); hostTimer = null;
+  G = null; S = null; solo = false; isHost = false; code = ''; hostPeer = null; curEpoch = 0; lastStAt = 0; handlers.act = null;
+  seatKey = ''; fireKey = ''; lastEv = -1; lastOrderId = 0; myAnim.prevCrew = null; myAnim.lost = [];
+  $('seats').innerHTML = ''; $('fires').innerHTML = ''; $('grid').dataset.key = '';
+  flightHelpButtons.clear(); $('flightHelp').replaceChildren();
+  for (const id of ['o-between', 'o-end', 'o-config']) $(id).hidden = true;
+  document.documentElement.style.setProperty('--dmg', 0); document.body.classList.remove('alarm');
+  $('waitMsg').textContent = ''; $('lobbyErr').textContent = '';
+  show('s-lobby');
+}
+function openConfig(){
+  const inGame = S && (S.phase === 'play' || S.phase === 'between');
+  const nav = $('cfgNav'); nav.innerHTML = '';
+  const add = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = label; b.onclick = () => { $('o-config').hidden = true; fn(); }; nav.appendChild(b); return b; };
+  if (flightDesktop.matches) add(flightCabin ? 'Vista celular' : 'Vista cabina', toggleFlightView).id = 'flightViewToggle';
+  if (isHost && S && S.phase !== 'lobby') add('Volver a la sala de espera (para todos)', backToWait);
+  if (!inGame) add('Editar mi tripulante', openProfile);
+  add(isHost && !solo ? 'Salir al inicio (otra persona del grupo toma el mando)' : 'Salir al inicio', leaveGame);
+  const set = isHost ? SET : ((S && S.set) || SET), box = $('cfgSet');
+  box.innerHTML = '<h3>Ajustes de la partida</h3>';
+  const group = (title, key, opts) => {
+    const p = document.createElement('p'); p.style.cssText = 'margin:10px 0 6px;color:#fff;font-weight:600;font-size:14px'; p.textContent = title;
+    const row = document.createElement('div'); row.className = 'opts2';
+    for (const [val, label] of opts){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label;
+      b.setAttribute('aria-pressed', set[key] === val);
+      if (!isHost) b.disabled = true;
+      b.onclick = () => { SET = { ...SET, [key]: val }; dirty = true; [...row.children].forEach(x => x.setAttribute('aria-pressed', x === b)); };
+      row.appendChild(b);
+    }
+    box.append(p, row);
+  };
+  group('Si hay varias personas de la misma área', 'reparto', [['compartir', 'Comparten el panel'], ['repartir', 'Se reparten los controles']]);
+  group('Tiempo para cada orden', 'tiempo', [[3, 'Relajado'], [0, 'Normal'], [-2, 'Rápido']]);
+  const n = document.createElement('p'); n.className = 'note';
+  n.textContent = isHost ? 'Los cambios se aplican enseguida para toda la tripulación.' : 'Solo quien creó la partida puede cambiar los ajustes.';
+  box.appendChild(n);
+  $('o-config').hidden = false; $('cfgClose').focus();
+}
+$('gear').onclick = openConfig;
+$('cfgClose').onclick = () => { $('o-config').hidden = true; };
+
+/* ===== Pantalla en vivo (para proyectar) ===== */
+const live = { on: false, groups: {}, unsub: null, feed: [] };
+const clampN = (v, a, b) => Math.max(a, Math.min(b, Math.round(Number(v) || 0)));
+function sanitizeBoard(d){
+  return {
+    code: d.code, nombre: String(d.nombre || ('Grupo ' + d.code.toUpperCase())).slice(0, 24),
+    phase: ['lobby', 'between', 'play', 'end'].includes(d.phase) ? d.phase : 'lobby',
+    stage: clampN(d.stage, 0, CONFIG.etapas.length - 1), cleared: clampN(d.cleared, -1, CONFIG.etapas.length - 1),
+    done: clampN(d.done, 0, 99), need: clampN(d.need, 0, 99), crew: clampN(d.crew, 0, CONFIG.naves), hull: clampN(d.hull, 0, 100),
+    errs: clampN(d.errs, 0, 9), manos: clampN(d.manos, 0, 9), broken: !!d.broken,
+    fires: (Array.isArray(d.fires) ? d.fires : []).slice(0, 8).map(f => ({ id: clampN(f.id, 0, 1e6), x: clampN(f.x, 0, 100), y: clampN(f.y, 0, 100) })),
+    players: (Array.isArray(d.players) ? d.players : []).slice(0, 12).map(p => ({ p: String(p.p || ''), name: String(p.name || '').slice(0, 18), area: AREA[p.area] ? p.area : 'tut', av: cleanAvatar(p.av) })),
+    ev: (Array.isArray(d.ev) ? d.ev : []).slice(-8).map(e => ({ i: clampN(e.i, 0, 1e9), k: String(e.k || ''), p: String(e.p || ''), to: String(e.to || '') })),
+    stats: d.stats && typeof d.stats === 'object' ? { help: clampN(d.stats.help, 0, 999), out: clampN(d.stats.out, 0, 999), err: clampN(d.stats.err, 0, 999), ok: clampN(d.stats.ok, 0, 9999) } : { help: 0, out: 0, err: 0, ok: 0 }
+  };
+}
+function liveFeed(text){
+  live.feed.unshift({ text, t: Date.now() }); live.feed = live.feed.slice(0, 8);
+  const ol = $('liveFeed'); ol.innerHTML = '';
+  for (const f of live.feed){
+    const li = document.createElement('li'), s = document.createElement('span');
+    s.textContent = new Date(f.t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    li.append(s, document.createTextNode(f.text)); ol.appendChild(li);
+  }
+  $('liveFeedWrap').hidden = !live.feed.length || document.body.classList.contains('nofeed');
+}
+async function openLive(){
+  show('s-live'); live.on = true;
+  $('liveMsg').textContent = 'Conectando…';
+  await roomP;
+  if (!room){ $('liveMsg').textContent = 'No se pudo conectar con el servidor del juego. Revisá tu conexión y recargá la página.'; return; }
+  if (!live.unsub) live.unsub = room.on('tablero', m => onBoard(m.data));
+  renderLive();
+}
+function closeLive(){ stopDemo(); $('liveDemo').textContent = 'Ver demo'; live.on = false; show(profile ? 's-lobby' : 's-profile'); if (location.hash === '#envivo' || location.hash === '#demo') history.replaceState(null, '', location.pathname + location.search); }
+$('liveBtn').onclick = openLive;
+$('liveBack').onclick = closeLive;
+
+function makeCard(code){
+  const el = document.createElement('article'); el.className = 'gcard';
+  el.innerHTML = `<header><div><h3 class="gname"></h3><small class="gcode"></small></div><span class="badge"></span></header>
+    <div class="cockpit mini"><canvas aria-hidden="true"></canvas><div class="strut l"></div><div class="strut r"></div><div class="gfires"></div><div class="dash"></div><div class="seats"></div><div class="dmgfx"></div><div class="ticker"></div></div>
+    <div class="gstats">
+      <div class="gbig">
+        <div><strong class="gcrew">${META}</strong><span class="gmaximum"> / ${META}</span></div>
+        <small class="gmini">Naves</small>
+        <small class="gcut">Aprueban con ${APROB}</small>
+      </div>
+      <div class="gside">
+        <div class="gstage"><span class="gst"></span><span class="gstname"></span></div>
+        <div><span class="gorders">Órdenes</span><div class="mbar" aria-hidden="true"><i class="gprog" style="background:var(--mint)"></i></div></div>
+        <div><span class="ghull"></span><div class="mbar" aria-hidden="true"><i class="ghullbar"></i></div></div>
+        <div class="gmisc"><span>Fuegos <b class="gfirecount"></b></span><span>Manos <b class="ghelpcount"></b></span><span>Errores <b class="gerrcount"></b></span><span>Manos dadas <b class="ghelptotal"></b></span></div>
+      </div>
+    </div>`;
+  el.querySelector('.gcode').textContent = 'Código ' + code.toUpperCase();
+  return { el, data: null, seen: 0, lastEv: -1, seatKey: '', fireKey: '', tickT: 0, anim: { prevCrew: null, lost: [] } };
+}
+function cardSeat(g, p){ return [...g.el.querySelectorAll('.seat')].find(s => s.dataset.p === p); }
+function cardFx(g, p, cls, text, color){
+  const s = cardSeat(g, p); if (!s) return;
+  s.classList.remove('ok', 'err', 'helped'); void s.offsetWidth; s.classList.add(cls);
+  setTimeout(() => s.classList.remove(cls), 900);
+  if (text){ const t = document.createElement('span'); t.className = 'popfx'; t.textContent = text; t.style.color = color || '#fff'; s.appendChild(t); setTimeout(() => t.remove(), 900); }
+}
+function cardTicker(g, text){ g.el.querySelector('.ticker').textContent = text; g.tickT = Date.now() + 2600; }
+function cardEv(g, e){
+  const nm = p => { const x = g.data.players.find(q => q.p === p); return x ? x.name : 'Alguien'; };
+  if (e.k === 'ok') cardFx(g, e.p, 'ok', '✓', '#79FFBA');
+  else if (e.k === 'err') cardFx(g, e.p, 'err', '✗', '#E4572E');
+  else if (e.k === 'fail'){ cardFx(g, e.p, 'err', '🔥'); cardTicker(g, `¡Se le venció una orden a ${nm(e.p)}! Fuego a bordo.`); }
+  else if (e.k === 'help'){ cardFx(g, e.p, 'ok', '🤝'); cardFx(g, e.to, 'helped', `+${JUEGO.segundosAyuda} s`, '#49E3E7'); cardTicker(g, `${nm(e.p)} le dio una mano a ${nm(e.to)}.`); liveFeed(`En ${g.data.nombre}, ${nm(e.p)} le dio una mano a ${nm(e.to)}.`); }
+  else if (e.k === 'out'){ cardFx(g, e.p, 'ok', '🧯'); cardTicker(g, `${nm(e.p)} apagó un fuego.`); }
+  else if (e.k === 'errloss') cardTicker(g, `Se acumularon ${JUEGO.erroresPorNave} errores: se alejó una nave.`);
+}
+function onBoard(raw){
+  if (!raw || typeof raw.code !== 'string' || !/^[a-z0-9]{4}$/.test(raw.code)) return;
+  let g = live.groups[raw.code];
+  if (raw.phase === 'closed'){
+    if (g){ g.el.remove(); delete live.groups[raw.code]; liveFeed(`${g.data.nombre} cerró su partida.`); }
+    renderLive(); return;
+  }
+  const d = sanitizeBoard(raw), isNew = !g;
+  if (isNew) g = live.groups[raw.code] = makeCard(raw.code);
+  const prev = g.data; g.data = d; g.seen = Date.now();
+  if (!prev) liveFeed(`Se conectó ${d.nombre}.`);
+  else {
+    if (prev.nombre !== d.nombre && prev.phase === 'lobby') {}
+    if (d.phase !== 'lobby' && prev.phase === 'lobby') liveFeed(`${d.nombre} despegó con ${d.players.length} tripulantes.`);
+    if (d.cleared > prev.cleared && d.cleared >= 0 && d.phase !== 'lobby') liveFeed(`${d.nombre} superó la etapa ${d.cleared + 1}: ${CONFIG.etapas[d.cleared].nombre}.`);
+    if (d.phase === 'end' && prev.phase !== 'end') liveFeed(d.broken ? `¡A ${d.nombre} se le rompió la nave!` : `${d.nombre} terminó con ${d.crew} naves: ${d.crew >= META ? '¡misión perfecta!' : d.crew >= APROB ? 'aprobó.' : 'no alcanzó.'}`);
+    if (d.hull <= 30 && prev.hull > 30 && d.phase === 'play') liveFeed(`¡Alerta en ${d.nombre}: casco al ${d.hull}%!`);
+  }
+  trackCrewFor(g.anim, d);
+  if (g.lastEv < 0) g.lastEv = d.ev.length ? d.ev[d.ev.length - 1].i : 0;
+  else for (const e of d.ev) if (e.i > g.lastEv){ g.lastEv = e.i; cardEv(g, e); }
+  renderCard(g); renderLive();
+}
+function renderCard(g){
+  const d = g.data, el = g.el;
+  el.querySelector('.gname').textContent = d.nombre;
+  const badge = el.querySelector('.badge');
+  const [txt, cls] = d.phase === 'lobby' ? [`En sala de espera (${d.players.length})`, '']
+    : d.phase === 'between' ? ['Entre etapas', 'ok'] : d.phase === 'play' ? ['Jugando', 'play']
+    : d.broken ? ['Nave rota', 'bad'] : d.crew >= META ? ['Misión perfecta', 'ok'] : d.crew >= APROB ? ['Aprobó', 'ok'] : ['No alcanzó', 'bad'];
+  badge.textContent = txt; badge.className = 'badge ' + cls;
+  const crew = el.querySelector('.gcrew'); crew.textContent = d.crew; crew.classList.toggle('below', d.crew < APROB);
+  el.querySelector('.gst').textContent = `Etapa ${d.stage + 1} de ${CONFIG.etapas.length}`;
+  el.querySelector('.gstname').textContent = CONFIG.etapas[d.stage].nombre;
+  el.querySelector('.gorders').textContent = d.phase === 'play' && d.need ? `Órdenes ${d.done}/${d.need}` : 'Órdenes';
+  el.querySelector('.gprog').style.width = (d.phase === 'play' && d.need ? d.done / d.need * 100 : d.phase === 'end' ? 100 : 0) + '%';
+  el.querySelector('.ghull').textContent = `Casco ${d.hull}%`;
+  const hb = el.querySelector('.ghullbar'); hb.style.width = d.hull + '%'; hb.style.background = d.hull < 30 ? '#E4572E' : d.hull < 60 ? '#F2B33D' : '#49E3E7';
+  el.querySelector('.gfirecount').textContent = d.fires.length;
+  el.querySelector('.ghelpcount').textContent = d.manos;
+  el.querySelector('.gerrcount').textContent = `${d.errs}/${JUEGO.erroresPorNave}`;
+  el.querySelector('.ghelptotal').textContent = d.stats.help;
+  el.querySelector('.cockpit').style.setProperty('--dmg', ((100 - d.hull) / 100).toFixed(2));
+  el.classList.toggle('alarm', d.phase === 'play' && d.hull < 30);
+  // asientos
+  const key = d.players.map(p => p.p + JSON.stringify(p.av)).join('|');
+  if (key !== g.seatKey){
+    g.seatKey = key; const box = el.querySelector('.seats'); box.innerHTML = '';
+    for (const p of d.players){
+      const s = document.createElement('div'); s.className = 'seat'; s.dataset.p = p.p;
+      const av = document.createElement('div'); av.className = 'av'; av.innerHTML = avatarSVG(p.av);
+      const b = document.createElement('b'); b.textContent = p.name;
+      s.append(av, b); box.appendChild(s);
+    }
+  }
+  // fuegos
+  const fk = d.fires.map(f => f.id).join(',');
+  if (fk !== g.fireKey){
+    g.fireKey = fk; const box = el.querySelector('.gfires'), ids = new Set(d.fires.map(f => f.id));
+    for (const f of [...box.children]) if (!ids.has(+f.dataset.id)){ f.classList.add('out'); setTimeout(() => f.remove(), 400); }
+    for (const f of d.fires){
+      if ([...box.children].some(x => +x.dataset.id === f.id)) continue;
+      const x = document.createElement('div'); x.className = 'fire'; x.dataset.id = f.id; x.style.left = f.x + '%'; x.style.top = f.y + '%';
+      x.innerHTML = fireArt; box.appendChild(x);
+    }
+  }
+}
+function rankScore(d){ if (d.broken) return -1; return (d.phase === 'end' ? 1000 : 0) + (d.cleared + 1) * 100 + d.crew; }
+function renderLive(){
+  const list = Object.values(live.groups).filter(g => g.data).sort((a, b) => rankScore(b.data) - rankScore(a.data));
+  const grid = $('liveGrid');
+  for (const g of list) grid.appendChild(g.el);
+  const n = list.length, narrow = matchMedia('(max-width: 900px)').matches;
+  const cols = narrow ? 1 : n <= 1 ? 1 : n <= 4 ? 2 : 3, rows = Math.max(1, Math.ceil(n / cols));
+  grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+  grid.style.gridTemplateRows = narrow ? '' : `repeat(${rows}, minmax(0, 1fr))`;
+  $('liveMsg').textContent = list.length ? '' : 'Todavía no hay grupos conectados. Cuando un grupo cree su partida, aparece acá.';
+  const rank = $('liveRank'); rank.innerHTML = '';
+  list.forEach((g, i) => {
+    const li = document.createElement('li'), b = document.createElement('b'), sm = document.createElement('span');
+    b.textContent = `${i + 1}. ${g.data.nombre}`;
+    sm.textContent = g.data.phase === 'lobby' ? ' en sala de espera' : g.data.broken ? ' nave rota' : ` etapa ${g.data.stage + 1}, ${g.data.crew} naves`;
+    li.append(b, sm); rank.appendChild(li);
+  });
+  $('liveRank').hidden = !list.length;
+}
+function drawCard(g, now){
+  if (!g.canvas){ g.canvas = g.el.querySelector('canvas'); g.ctx = g.canvas.getContext('2d'); }
+  const frame = prepareCabinFrame(g.canvas, g.ctx, now, g.data, true);
+  if (frame && g.data.phase !== 'lobby') drawSceneOn(g.ctx, frame.w, frame.h, now, g.data, g.anim);
+}
+function liveTick(now){
+  const t = Date.now();
+  for (const g of Object.values(live.groups)){
+    if (!g.data) continue;
+    drawCard(g, now);
+    if (g.tickT && t > g.tickT){ g.el.querySelector('.ticker').textContent = ''; g.tickT = 0; }
+    const stale = t - g.seen > 20000;
+    if (stale !== g.el.classList.contains('stale')){ g.el.classList.toggle('stale', stale); if (stale) g.el.querySelector('.badge').textContent = 'Sin señal'; }
+    if (t - g.seen > 180000){ g.el.remove(); delete live.groups[g.data.code]; renderLive(); }
+  }
+}
+$('feedToggle').onclick = () => {
+  const hide = !document.body.classList.contains('nofeed');
+  document.body.classList.toggle('nofeed', hide);
+  $('feedToggle').textContent = hide ? 'Mostrar alertas' : 'Ocultar alertas';
+  if (hide) $('liveFeedWrap').hidden = true; else $('liveFeedWrap').hidden = !live.feed.length;
+};
+$('fsBtn').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+};
+document.addEventListener('fullscreenchange', () => { $('fsBtn').textContent = document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'; });
+if (location.hash === '#envivo') openLive();
+
+/* ===== Demo de la pantalla en vivo (grupos simulados) ===== */
+let demoTimer = null;
+function startDemo(){
+  stopDemo(true);
+  show('s-live'); live.on = true; $('demoBanner').hidden = false; $('liveMsg').textContent = '';
+  const nombres = ['Ana', 'Leo', 'Juli', 'Caro', 'Nico', 'Meli', 'Fede', 'Sofi', 'Lu', 'Agus', 'Vale', 'Martu', 'Santi', 'Pau', 'Gabi', 'Rami', 'Cami', 'Joaco', 'Flor', 'Mati'];
+  const grupos = [['dem1', 'Nave Orión', .8], ['dem2', 'Nave Andrómeda', .68], ['dem3', 'Nave Vega', .58], ['dem4', 'Nave Lyra', .45]];
+  let ni = 0;
+  const sims = grupos.map(([code, nombre, skill], gi) => {
+    const n = 4 + (gi % 2), areas = CONFIG.areas.map(a => a.id).sort(() => Math.random() - .5);
+    const players = Array.from({ length: n }, (_, k) => ({ p: code + k, name: nombres[ni++ % nombres.length], area: areas[k % areas.length], av: cleanAvatar(Object.fromEntries(Object.keys(AV).map(key => [key, Math.floor(Math.random() * AV[key].length)]))) }));
+    return { code, nombre, skill, players, t0: Date.now() + gi * 1500 };
+  });
+  const reset = s => Object.assign(s, { phase: 'lobby', stage: 0, cleared: -1, done: 0, need: 6 + s.players.length * 2, crew: CONFIG.naves, hull: 100, errs: 0, manos: JUEGO.manosPorEtapa,
+    broken: false, fires: [], ev: [], evSeq: 0, fireSeq: 0, stats: { ok: 0, err: 0, help: 0, out: 0 }, until: Date.now() + 2500 + Math.random() * 3000 });
+  sims.forEach(reset);
+  const ev = (s, k, p, to) => { s.ev.push({ i: ++s.evSeq, k, p, to: to || '' }); if (s.ev.length > 6) s.ev.shift(); };
+  const pick = s => s.players[Math.floor(Math.random() * s.players.length)].p;
+  const step = () => {
+    const now = Date.now();
+    for (const s of sims){
+      if (now < s.t0) continue;
+      if (s.phase === 'lobby' && now > s.until){ s.phase = 'between'; s.until = now + 3500; }
+      else if (s.phase === 'between' && now > s.until){ s.phase = 'play'; s.done = 0; }
+      else if (s.phase === 'end' && now > s.until){ reset(s); }
+      else if (s.phase === 'play'){
+        for (let k = 0; k < 2; k++){
+          const r = Math.random();
+          const pOk = .5 + s.skill * .4, pErr = pOk + .07, pFail = pErr + (1 - s.skill) * .2;
+          if (r < pOk){
+            s.done++; s.stats.ok++; ev(s, 'ok', pick(s));
+            if (s.done >= s.need){
+              s.cleared = s.stage; s.fires = s.fires.slice(0, 1);
+              if (s.stage >= CONFIG.etapas.length - 1){ s.phase = 'end'; s.until = now + 12000; }
+              else { s.stage++; s.phase = 'between'; s.until = now + 3500; s.manos = JUEGO.manosPorEtapa; }
+              break;
+            }
+          } else if (r < pErr){
+            s.errs++; s.stats.err++; s.hull -= JUEGO.danoError; ev(s, 'err', pick(s));
+            if (s.errs >= JUEGO.erroresPorNave){ s.errs = 0; s.crew--; ev(s, 'errloss', pick(s)); }
+          } else if (r < pFail){
+            s.crew--; s.hull -= JUEGO.danoFalla; ev(s, 'fail', pick(s));
+            if (s.fires.length < JUEGO.maxFuegos) s.fires.push({ id: ++s.fireSeq, x: Math.round(12 + Math.random() * 76), y: Math.round(14 + Math.random() * 36) });
+          } else if (s.manos > 0 && Math.random() < .35){
+            const a = pick(s); let b = pick(s); if (a === b) b = s.players[(s.players.findIndex(p => p.p === a) + 1) % s.players.length].p;
+            s.manos--; s.stats.help++; ev(s, 'help', a, b);
+          } else if (s.fires.length){
+            s.fires.shift(); s.stats.out++; ev(s, 'out', pick(s));
+          }
+        }
+        s.hull -= s.fires.length * .25;
+        if (s.hull <= 0 || s.crew <= 0){ s.hull = Math.max(0, s.hull); s.crew = Math.max(0, s.crew); s.broken = s.hull <= 0; s.phase = 'end'; s.until = now + 12000; }
+      }
+      if (now >= s.t0) onBoard({ code: s.code, nombre: s.nombre, phase: s.phase, stage: s.stage, cleared: s.cleared, done: s.done, need: s.need, crew: s.crew,
+        hull: Math.round(s.hull), errs: s.errs, manos: s.manos, broken: s.broken, fires: s.fires, players: s.players, ev: s.ev, stats: s.stats });
+    }
+  };
+  demoTimer = setInterval(step, 600); step();
+}
+function stopDemo(silent){
+  if (demoTimer){ clearInterval(demoTimer); demoTimer = null; }
+  for (const code of Object.keys(live.groups)) if (code.startsWith('dem')){ live.groups[code].el.remove(); delete live.groups[code]; }
+  $('demoBanner').hidden = true;
+  if (!silent){ live.feed = []; $('liveFeed').innerHTML = ''; $('liveFeedWrap').hidden = true; renderLive(); }
+}
+$('liveDemo').onclick = () => { if (demoTimer){ stopDemo(); $('liveDemo').textContent = 'Ver demo'; openLive(); } else { live.feed = []; startDemo(); $('liveDemo').textContent = 'Terminar demo'; } };
+if (location.hash === '#demo'){ startDemo(); $('liveDemo').textContent = 'Terminar demo'; }
+
+/* === Presentación y atajos de la partida === */
+const flightDesktop = matchMedia('(min-width:901px) and (pointer:fine)');
+const flightLandscape = matchMedia('(orientation:landscape) and (max-height:520px) and (pointer:coarse)');
+const flightHelpButtons = new Map();
+const flightPreferenceKey = 'odisea-vista';
+let flightPreference;
+try { flightPreference = localStorage.getItem(flightPreferenceKey); } catch (e) {}
+let flightCabin = false;
+
+function placeFlightAlerts(){
+  const wide = flightCabin || flightLandscape.matches;
+  const error = $('errMsg'), order = $('order'), help = $('flightHelp');
+  const errorHome = wide ? help.parentElement : order;
+  if (error.parentElement !== errorHome){
+    errorHome.insertBefore(error, wide ? help : order.querySelector('.timer-track'));
+  }
+  for (const { seat, button, name } of flightHelpButtons.values()){
+    const home = wide ? help : seat;
+    if (button.parentElement !== home) home.appendChild(button);
+    const label = wide ? `¡Ayudá a ${name}!` : 'Dale una mano';
+    if (button.textContent !== label) button.textContent = label;
+  }
+}
+
+function updateFlightHelp(now){
+  const active = S?.phase === 'play' && S.manos > 0;
+  const names = [];
+  for (const [peer, { button, name }] of flightHelpButtons){
+    const left = active && S.ins[peer] && ends[peer] ? ends[peer].end - now : 0;
+    const available = left > 0 && left < 4000;
+    if (button.hidden === available) button.hidden = !available;
+    if (available && (flightCabin || flightLandscape.matches)) names.push(name);
+  }
+  const status = $('flightHelpStatus');
+  const message = names.length ? `¡Ayudá a ${names.join(', ')}!` : '';
+  if (status.textContent !== message) status.textContent = message;
+}
+
+function labelFlightKeys(){
+  for (const [index, control] of [...$('grid').children].entries()){
+    if (index >= 6) continue;
+    const number = String(index + 1), dial = control.classList.contains('dial');
+    let key = control.querySelector('.flight-key');
+    if (!key){
+      key = document.createElement('kbd');
+      key.className = 'flight-key';
+      key.setAttribute('aria-hidden', 'true');
+      key.textContent = number;
+      if (dial){
+        const arrows = document.createElement('span');
+        arrows.className = 'flight-dial-keys';
+        arrows.textContent = '← →';
+        key.appendChild(arrows);
+      }
+      control.prepend(key);
+    }
+    if (flightCabin) control.setAttribute('aria-keyshortcuts', number);
+    else control.removeAttribute('aria-keyshortcuts');
+    if (dial){
+      for (const segment of control.querySelectorAll('.seg button')){
+        if (flightCabin) segment.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight');
+        else segment.removeAttribute('aria-keyshortcuts');
+      }
+    }
+  }
+}
+
+function applyFlightView(){
+  flightCabin = flightDesktop.matches && flightPreference !== 'mobile';
+  document.body.dataset.flightView = flightCabin ? 'cabin' : 'mobile';
+  placeFlightAlerts();
+  labelFlightKeys();
+}
+
+function toggleFlightView(){
+  flightPreference = flightCabin ? 'mobile' : 'cabin';
+  try { localStorage.setItem(flightPreferenceKey, flightPreference); } catch (e) {}
+  applyFlightView();
+  $('gear').focus();
+}
+
+$('dismissRotate').onclick = () => {
+  $('rotateTip').hidden = true;
+  $('gear').focus({ preventScroll: true });
+};
+/* FIX matchMedia */
+function watchMediaQuery(query, callback){
+  if (typeof query.addEventListener === 'function') query.addEventListener('change', callback);
+  else if (typeof query.addListener === 'function') query.addListener(callback);
+}
+watchMediaQuery(flightDesktop, applyFlightView);
+watchMediaQuery(flightLandscape, applyFlightView);
+applyFlightView();
+
+document.addEventListener('keydown', event => {
+  if (!flightCabin || $('s-play').hidden || S?.phase !== 'play' || !$('o-config').hidden ||
+      event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey ||
+      event.altKey || event.metaKey || event.shiftKey ||
+      event.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])')) return;
+  if (/^[1-6]$/.test(event.key)){
+    const control = $('grid').children[Number(event.key) - 1];
+    if (!control) return;
+    event.preventDefault();
+    const selected = control.querySelector('.seg [aria-pressed="true"]');
+    if (control.classList.contains('dial')){
+      (selected || control.querySelector('.seg button')).focus({ preventScroll: true });
+    } else control.click();
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight'){
+    const dial = event.target.closest?.('#grid .dial');
+    if (!dial) return;
+    event.preventDefault();
+    const segments = [...dial.querySelectorAll('.seg button')];
+    const step = event.key === 'ArrowLeft' ? -1 : 1;
+    const index = segments.indexOf(event.target), next = segments[index + step];
+    if (!next) return;
+    next.focus({ preventScroll: true });
+    next.click();
+  }
+});
+
+function drawFlightStreaks(c, w, h, now){
+  const cx = w * .54, cy = h * .54;
+  c.strokeStyle = 'rgba(172,214,255,.28)';
+  c.lineWidth = .85;
+  c.beginPath();
+  for (let i = 0; i < 28; i++){
+    const angle = i * 2.4, depth = ((now * .00011 + i * .271) % 1) ** 2;
+    const dx = Math.cos(angle) * w * .63, dy = Math.sin(angle) * h * .72;
+    const tail = depth * .94;
+    c.moveTo(cx + dx * tail, cy + dy * tail);
+    c.lineTo(cx + dx * depth, cy + dy * depth);
+  }
+  c.stroke();
+}
+
+function flightApproach(anim, stage, progress, now, reduced){
+  if (reduced) return .85;
+  if (anim.approach?.stage !== stage || now - anim.approach.time > 500){
+    anim.approach = { stage, progress, time: now };
+  }
+  const approach = anim.approach;
+  approach.progress += (progress - approach.progress) * (1 - Math.exp((approach.time - now) / 340));
+  approach.time = now;
+  return .62 + approach.progress * .58;
+}
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
